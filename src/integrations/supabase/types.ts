@@ -14,7 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          item_type: string
+          quantity: number
+          unit: string
+          unit_price: number
+          user_id: string
+          vat_rate: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          item_type?: string
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          user_id: string
+          vat_rate?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          item_type?: string
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          user_id?: string
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          bank_account: string | null
+          client_address: string | null
+          client_dic: string | null
+          client_email: string | null
+          client_ico: string | null
+          client_name: string
+          client_phone: string | null
+          client_vat_payer: boolean
+          created_at: string
+          currency: string
+          due_date: string
+          id: string
+          invoice_number: string
+          issue_date: string
+          note: string | null
+          payment_method: string
+          status: string
+          subtotal: number
+          taxable_date: string
+          total: number
+          updated_at: string
+          user_id: string
+          variable_symbol: string | null
+          vat_amount: number
+          vat_rate: number
+        }
+        Insert: {
+          bank_account?: string | null
+          client_address?: string | null
+          client_dic?: string | null
+          client_email?: string | null
+          client_ico?: string | null
+          client_name: string
+          client_phone?: string | null
+          client_vat_payer?: boolean
+          created_at?: string
+          currency?: string
+          due_date?: string
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          note?: string | null
+          payment_method?: string
+          status?: string
+          subtotal?: number
+          taxable_date?: string
+          total?: number
+          updated_at?: string
+          user_id: string
+          variable_symbol?: string | null
+          vat_amount?: number
+          vat_rate?: number
+        }
+        Update: {
+          bank_account?: string | null
+          client_address?: string | null
+          client_dic?: string | null
+          client_email?: string | null
+          client_ico?: string | null
+          client_name?: string
+          client_phone?: string | null
+          client_vat_payer?: boolean
+          created_at?: string
+          currency?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          note?: string | null
+          payment_method?: string
+          status?: string
+          subtotal?: number
+          taxable_date?: string
+          total?: number
+          updated_at?: string
+          user_id?: string
+          variable_symbol?: string | null
+          vat_amount?: number
+          vat_rate?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
