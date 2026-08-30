@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_profiles: {
+        Row: {
+          address: string | null
+          bank_account: string | null
+          company_name: string
+          created_at: string
+          default_note: string | null
+          dic: string | null
+          email: string | null
+          iban: string | null
+          ico: string | null
+          invoice_footer: string | null
+          invoice_header_note: string | null
+          logo_url: string | null
+          pdf_accent: string
+          pdf_layout: string
+          pdf_show_logo: boolean
+          phone: string | null
+          swift: string | null
+          updated_at: string
+          user_id: string
+          vat_payer: boolean
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          bank_account?: string | null
+          company_name?: string
+          created_at?: string
+          default_note?: string | null
+          dic?: string | null
+          email?: string | null
+          iban?: string | null
+          ico?: string | null
+          invoice_footer?: string | null
+          invoice_header_note?: string | null
+          logo_url?: string | null
+          pdf_accent?: string
+          pdf_layout?: string
+          pdf_show_logo?: boolean
+          phone?: string | null
+          swift?: string | null
+          updated_at?: string
+          user_id: string
+          vat_payer?: boolean
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          bank_account?: string | null
+          company_name?: string
+          created_at?: string
+          default_note?: string | null
+          dic?: string | null
+          email?: string | null
+          iban?: string | null
+          ico?: string | null
+          invoice_footer?: string | null
+          invoice_header_note?: string | null
+          logo_url?: string | null
+          pdf_accent?: string
+          pdf_layout?: string
+          pdf_show_logo?: boolean
+          phone?: string | null
+          swift?: string | null
+          updated_at?: string
+          user_id?: string
+          vat_payer?: boolean
+          website?: string | null
+        }
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           created_at: string
@@ -78,7 +150,9 @@ export type Database = {
           invoice_number: string
           issue_date: string
           note: string | null
+          paid_date: string | null
           payment_method: string
+          sent_at: string | null
           status: string
           subtotal: number
           taxable_date: string
@@ -105,7 +179,9 @@ export type Database = {
           invoice_number: string
           issue_date?: string
           note?: string | null
+          paid_date?: string | null
           payment_method?: string
+          sent_at?: string | null
           status?: string
           subtotal?: number
           taxable_date?: string
@@ -132,7 +208,9 @@ export type Database = {
           invoice_number?: string
           issue_date?: string
           note?: string | null
+          paid_date?: string | null
           payment_method?: string
+          sent_at?: string | null
           status?: string
           subtotal?: number
           taxable_date?: string
