@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as FakturyIndexRouteImport } from './routes/faktury.index'
+import { Route as FakturyNovaRouteImport } from './routes/faktury.nova'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,49 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FakturyIndexRoute = FakturyIndexRouteImport.update({
+  id: '/faktury/',
+  path: '/faktury/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FakturyNovaRoute = FakturyNovaRouteImport.update({
+  id: '/faktury/nova',
+  path: '/faktury/nova',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/faktury/nova': typeof FakturyNovaRoute
+  '/faktury/': typeof FakturyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/faktury/nova': typeof FakturyNovaRoute
+  '/faktury': typeof FakturyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/faktury/nova': typeof FakturyNovaRoute
+  '/faktury/': typeof FakturyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths: '/' | '/auth' | '/faktury/nova' | '/faktury/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to: '/' | '/auth' | '/faktury/nova' | '/faktury'
+  id: '__root__' | '/' | '/auth' | '/faktury/nova' | '/faktury/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  FakturyNovaRoute: typeof FakturyNovaRoute
+  FakturyIndexRoute: typeof FakturyIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faktury/': {
+      id: '/faktury/'
+      path: '/faktury'
+      fullPath: '/faktury/'
+      preLoaderRoute: typeof FakturyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faktury/nova': {
+      id: '/faktury/nova'
+      path: '/faktury/nova'
+      fullPath: '/faktury/nova'
+      preLoaderRoute: typeof FakturyNovaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  FakturyNovaRoute: FakturyNovaRoute,
+  FakturyIndexRoute: FakturyIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
