@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as FakturyIndexRouteImport } from './routes/faktury.index'
+import { Route as FakturyNovaRouteImport } from './routes/faktury.nova'
+import { Route as FakturyIdIndexRouteImport } from './routes/faktury.$id.index'
+import { Route as FakturyIdUpravitRouteImport } from './routes/faktury.$id.upravit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FakturyIndexRoute = FakturyIndexRouteImport.update({
+  id: '/faktury/',
+  path: '/faktury/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FakturyNovaRoute = FakturyNovaRouteImport.update({
+  id: '/faktury/nova',
+  path: '/faktury/nova',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FakturyIdIndexRoute = FakturyIdIndexRouteImport.update({
+  id: '/faktury/$id/',
+  path: '/faktury/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FakturyIdUpravitRoute = FakturyIdUpravitRouteImport.update({
+  id: '/faktury/$id/upravit',
+  path: '/faktury/$id/upravit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/faktury/nova': typeof FakturyNovaRoute
+  '/faktury/': typeof FakturyIndexRoute
+  '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
+  '/faktury/$id/': typeof FakturyIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/faktury/nova': typeof FakturyNovaRoute
+  '/faktury': typeof FakturyIndexRoute
+  '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
+  '/faktury/$id': typeof FakturyIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/faktury/nova': typeof FakturyNovaRoute
+  '/faktury/': typeof FakturyIndexRoute
+  '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
+  '/faktury/$id/': typeof FakturyIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/faktury/nova'
+    | '/faktury/'
+    | '/faktury/$id/upravit'
+    | '/faktury/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/faktury/nova'
+    | '/faktury'
+    | '/faktury/$id/upravit'
+    | '/faktury/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/faktury/nova'
+    | '/faktury/'
+    | '/faktury/$id/upravit'
+    | '/faktury/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  FakturyNovaRoute: typeof FakturyNovaRoute
+  FakturyIndexRoute: typeof FakturyIndexRoute
+  FakturyIdUpravitRoute: typeof FakturyIdUpravitRoute
+  FakturyIdIndexRoute: typeof FakturyIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faktury/': {
+      id: '/faktury/'
+      path: '/faktury'
+      fullPath: '/faktury/'
+      preLoaderRoute: typeof FakturyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faktury/nova': {
+      id: '/faktury/nova'
+      path: '/faktury/nova'
+      fullPath: '/faktury/nova'
+      preLoaderRoute: typeof FakturyNovaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faktury/$id/': {
+      id: '/faktury/$id/'
+      path: '/faktury/$id'
+      fullPath: '/faktury/$id/'
+      preLoaderRoute: typeof FakturyIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faktury/$id/upravit': {
+      id: '/faktury/$id/upravit'
+      path: '/faktury/$id/upravit'
+      fullPath: '/faktury/$id/upravit'
+      preLoaderRoute: typeof FakturyIdUpravitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  FakturyNovaRoute: FakturyNovaRoute,
+  FakturyIndexRoute: FakturyIndexRoute,
+  FakturyIdUpravitRoute: FakturyIdUpravitRoute,
+  FakturyIdIndexRoute: FakturyIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
