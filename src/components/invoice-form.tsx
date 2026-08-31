@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2 } from "lucide-react";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { calcItemTotals, formatCurrency } from "@/lib/invoice-utils";
+import { useCompanyProfile } from "@/lib/company-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,6 +53,8 @@ export function InvoiceForm({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: profile } = useCompanyProfile();
+  const [prefilled, setPrefilled] = useState(false);
 
   const [form, setForm] = useState({
     invoice_number: invoice?.invoice_number ?? "",
@@ -88,6 +91,17 @@ export function InvoiceForm({
       : [emptyItem()],
   );
 
+  // Předvyplnění údajů z profilu firmy u nové faktury
+  useEffect(() => {
+    if (invoice || prefilled || !profile) return;
+    setForm((f) => ({
+      ...f,
+      bank_account: f.bank_account || profile.bank_account || "",
+      note: f.note || profile.default_note || "",
+    }));
+    setPrefilled(true);
+  }, [invoice, prefilled, profile]);
+
   const totals = useMemo(() => calcItemTotals(rows), [rows]);
 
   const set = (key: keyof typeof form, value: string | boolean) =>
@@ -111,6 +125,10 @@ export function InvoiceForm({
         ...form,
         user_id: user.id,
         vat_rate: rows[0]?.vat_rate ?? 21,
+        paid_date:
+          form.status === "zaplacena"
+            ? (invoice?.paid_date ?? new Date().toISOString().slice(0, 10))
+            : null,
         subtotal: totals.subtotal,
         vat_amount: totals.vat,
         total: totals.total,
@@ -186,6 +204,7 @@ export function InvoiceForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="navrh">Návrh</SelectItem>
                 <SelectItem value="vystavena">Vystavená</SelectItem>
                 <SelectItem value="odeslana">Odeslaná</SelectItem>
                 <SelectItem value="zaplacena">Zaplacená</SelectItem>

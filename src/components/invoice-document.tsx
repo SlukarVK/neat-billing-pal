@@ -14,7 +14,7 @@ type InvoiceItem = Tables<"invoice_items">;
 
 export const InvoiceDocument = forwardRef<
   HTMLDivElement,
-  { invoice: Invoice; items: InvoiceItem[]; profile?: CompanyProfile | null }
+  { invoice: Invoice; items: InvoiceItem[]; profile?: CompanyProfile | null | undefined }
 >(function InvoiceDocument({ invoice, items, profile }, ref) {
   const accent = profile?.pdf_accent || "#1d4ed8";
   const compact = profile?.pdf_layout === "compact";
