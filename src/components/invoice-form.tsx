@@ -91,6 +91,17 @@ export function InvoiceForm({
       : [emptyItem()],
   );
 
+  // Předvyplnění údajů z profilu firmy u nové faktury
+  useEffect(() => {
+    if (invoice || prefilled || !profile) return;
+    setForm((f) => ({
+      ...f,
+      bank_account: f.bank_account || profile.bank_account || "",
+      note: f.note || profile.default_note || "",
+    }));
+    setPrefilled(true);
+  }, [invoice, prefilled, profile]);
+
   const totals = useMemo(() => calcItemTotals(rows), [rows]);
 
   const set = (key: keyof typeof form, value: string | boolean) =>
