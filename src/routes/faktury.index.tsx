@@ -1,14 +1,18 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Plus, Search, Trash2 } from "lucide-react";
+import { CheckCircle2, Download, FileText, Plus, Search, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
 import {
+  CSV_COLUMNS,
+  downloadFile,
   formatCurrency,
   formatDate,
+  parseCsv,
   STATUS_LABELS,
+  toCsv,
 } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +37,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -63,6 +75,7 @@ const statusVariant = (s: string) =>
 function InvoicesPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [importOpen, setImportOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: invoices, isLoading } = useQuery({
@@ -87,6 +100,90 @@ function InvoicesPage() {
       toast.success("Faktura byla smazána.");
     },
     onError: () => toast.error("Smazání se nezdařilo."),
+  });
+
+  const markPaid = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ status: "zaplacena", paid_date: new Date().toISOString().slice(0, 10) })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Faktura označena jako zaplacená.");
+    },
+    onError: () => toast.error("Změna se nezdařila."),
+  });
+
+  const importCsv = useMutation({
+    mutationFn: async (file: File) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Nejste přihlášeni.");
+      const rows = parseCsv(await file.text());
+      if (!rows.length) throw new Error("Soubor neobsahuje žádné řádky.");
+
+      const num = (v: string | undefined) => {
+        const n = Number(String(v ?? "").replace(/\s/g, "").replace(",", "."));
+        return Number.isFinite(n) ? n : 0;
+      };
+      const date = (v: string | undefined, fallback: string) => {
+        if (!v) return fallback;
+        const iso = /^\d{4}-\d{2}-\d{2}$/.test(v)
+          ? v
+          : (() => {
+              const m = v.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})$/);
+              return m ? `${m[3]}-${m[2]!.padStart(2, "0")}-${m[1]!.padStart(2, "0")}` : "";
+            })();
+        return iso || fallback;
+      };
+      const today = new Date().toISOString().slice(0, 10);
+
+      const payload = rows.map((r, i) => {
+        const subtotal = num(r["subtotal"]);
+        const vat = num(r["vat_amount"]);
+        const total = num(r["total"]) || subtotal + vat;
+        return {
+          user_id: user.id,
+          invoice_number: r["invoice_number"] || `IMPORT-${Date.now()}-${i + 1}`,
+          status: r["status"] && STATUS_LABELS[r["status"]] ? r["status"] : "vystavena",
+          client_name: r["client_name"] || "Neznámý klient",
+          client_address: r["client_address"] || null,
+          client_ico: r["client_ico"] || null,
+          client_dic: r["client_dic"] || null,
+          client_phone: r["client_phone"] || null,
+          client_email: r["client_email"] || null,
+          client_vat_payer: ["1", "true", "ano", "yes"].includes(
+            (r["client_vat_payer"] ?? "").toLowerCase(),
+          ),
+          issue_date: date(r["issue_date"], today),
+          due_date: date(r["due_date"], today),
+          taxable_date: date(r["taxable_date"], today),
+          paid_date: r["paid_date"] ? date(r["paid_date"], today) : null,
+          payment_method: r["payment_method"] || "prevod",
+          bank_account: r["bank_account"] || null,
+          variable_symbol: r["variable_symbol"] || null,
+          currency: (r["currency"] || "CZK").toUpperCase(),
+          subtotal,
+          vat_amount: vat,
+          total,
+          note: r["note"] || null,
+        };
+      });
+
+      const { error } = await supabase.from("invoices").insert(payload);
+      if (error) throw error;
+      return payload.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setImportOpen(false);
+      toast.success(`Importováno ${count} faktur.`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Import se nezdařil."),
   });
 
   const filtered = useMemo(() => {
@@ -118,12 +215,37 @@ function InvoicesPage() {
             {filtered.length} faktur · celkem {formatCurrency(totalSum)}
           </p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          onClick={() =>
+            downloadFile(
+              toCsv(
+                filtered.map((inv) =>
+                  Object.fromEntries(
+                    CSV_COLUMNS.map((c) => [c, (inv as Record<string, unknown>)[c]]),
+                  ),
+                ),
+              ),
+              `faktury-${new Date().toISOString().slice(0, 10)}.csv`,
+              "text/csv;charset=utf-8",
+            )
+          }
+        >
+          <Download className="mr-1.5 h-4 w-4" />
+          Export CSV
+        </Button>
+        <Button variant="outline" onClick={() => setImportOpen(true)}>
+          <Upload className="mr-1.5 h-4 w-4" />
+          Import CSV
+        </Button>
         <Button asChild className="shadow-pop">
           <Link to="/faktury/nova">
             <Plus className="mr-1.5 h-4 w-4" />
             Nová faktura
           </Link>
         </Button>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-3">
@@ -176,7 +298,7 @@ function InvoicesPage() {
                   <TableHead>Splatnost</TableHead>
                   <TableHead>Stav</TableHead>
                   <TableHead className="text-right">Částka</TableHead>
-                  <TableHead className="w-12" />
+                  <TableHead className="w-24" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -202,7 +324,17 @@ function InvoicesPage() {
                     <TableCell className="text-right font-medium">
                       {formatCurrency(Number(inv.total), inv.currency)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex justify-end gap-1">
+                      {inv.status !== "zaplacena" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Označit jako zaplacenou"
+                          onClick={() => markPaid.mutate(inv.id)}
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                        </Button>
+                      )}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="icon" title="Smazat">
@@ -233,6 +365,36 @@ function InvoicesPage() {
           )}
         </CardContent>
       </Card>
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import faktur z CSV</DialogTitle>
+            <DialogDescription>
+              Nahrajte CSV soubor se stejnými sloupci, jaké vytvoří export (oddělovač „;“ nebo
+              „,“). Vytvoří se nové faktury bez položek.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              type="file"
+              accept=".csv,text/csv"
+              disabled={importCsv.isPending}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) importCsv.mutate(file);
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Sloupce: {CSV_COLUMNS.join(", ")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)}>
+              Zavřít
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
