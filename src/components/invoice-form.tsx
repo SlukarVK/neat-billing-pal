@@ -125,6 +125,10 @@ export function InvoiceForm({
         ...form,
         user_id: user.id,
         vat_rate: rows[0]?.vat_rate ?? 21,
+        paid_date:
+          form.status === "zaplacena"
+            ? (invoice?.paid_date ?? new Date().toISOString().slice(0, 10))
+            : null,
         subtotal: totals.subtotal,
         vat_amount: totals.vat,
         total: totals.total,
@@ -200,6 +204,7 @@ export function InvoiceForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="navrh">Návrh</SelectItem>
                 <SelectItem value="vystavena">Vystavená</SelectItem>
                 <SelectItem value="odeslana">Odeslaná</SelectItem>
                 <SelectItem value="zaplacena">Zaplacená</SelectItem>
