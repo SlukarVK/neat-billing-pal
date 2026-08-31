@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { FileText, LogOut, Plus, LayoutList } from "lucide-react";
+import { FileText, LogOut, Plus, LayoutList, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
