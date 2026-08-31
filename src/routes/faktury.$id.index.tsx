@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { AppShell } from "@/components/app-shell";
 import { InvoiceDocument } from "@/components/invoice-document";
 import { useCompanyProfile } from "@/lib/company-profile";
@@ -85,7 +86,7 @@ function InvoiceDetailPage() {
   const invoice = data?.invoice;
 
   const update = useMutation({
-    mutationFn: async (patch: Record<string, unknown>) => {
+    mutationFn: async (patch: TablesUpdate<"invoices">) => {
       const { error } = await supabase.from("invoices").update(patch).eq("id", id);
       if (error) throw error;
     },
@@ -251,7 +252,7 @@ function InvoiceDetailPage() {
 
       <Card className="print-area shadow-card">
         <CardContent className="p-0">
-          <InvoiceDocument ref={docRef} invoice={invoice} items={items} profile={profile} />
+          <InvoiceDocument ref={docRef} invoice={invoice} items={items} profile={profile ?? null} />
         </CardContent>
       </Card>
 
