@@ -53,6 +53,8 @@ export function InvoiceForm({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: profile } = useCompanyProfile();
+  const [prefilled, setPrefilled] = useState(false);
 
   const [form, setForm] = useState({
     invoice_number: invoice?.invoice_number ?? "",
