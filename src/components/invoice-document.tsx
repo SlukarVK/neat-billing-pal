@@ -31,18 +31,19 @@ export const InvoiceDocument = forwardRef<
   return (
     <div
       ref={ref}
-      className="mx-auto w-full max-w-[820px] bg-white text-neutral-900"
+      className="invoice-doc mx-auto w-full max-w-[820px] bg-white text-neutral-900"
       style={{ padding: compact ? "24px 28px" : "40px 44px", fontFamily: "Inter, system-ui, sans-serif" }}
     >
       {/* Header */}
       <div
-        className="flex flex-wrap items-start justify-between gap-6 pb-5"
+        className="invoice-header avoid-break flex flex-wrap items-start justify-between gap-6 pb-5"
         style={{ borderBottom: `3px solid ${accent}` }}
       >
         <div className="flex items-start gap-4">
           {showLogo && (
             <img
               src={profile!.logo_url!}
+
               alt={profile?.company_name || "Logo"}
               style={{ maxHeight: compact ? 44 : 64, maxWidth: 180, objectFit: "contain" }}
             />
