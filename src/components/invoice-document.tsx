@@ -232,9 +232,10 @@ export const InvoiceDocument = forwardRef<
       )}
 
 
-      <div className="mt-8 border-t pt-3 text-center text-[11px] text-neutral-500">
+      <div className="avoid-break mt-8 border-t pt-3 text-center text-[11px] text-neutral-500">
         {profile?.invoice_footer || "Děkujeme za spolupráci."}
       </div>
+
     </div>
   );
 });
