@@ -100,4 +100,10 @@ export async function downloadInvoicePdf(element: HTMLElement, invoiceNumber: st
   pdf.save(`faktura-${invoiceNumber || "bez-cisla"}.pdf`);
 }
 
+/** Uloží libovolný DOM uzel jako PDF pod zadaným názvem souboru. */
+export async function downloadElementAsPdf(element: HTMLElement, filename: string) {
+  const pdf = await elementToPdf(element);
+  pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`);
+}
+
 export const PDF_PAGE_RATIO = A4_RATIO;
