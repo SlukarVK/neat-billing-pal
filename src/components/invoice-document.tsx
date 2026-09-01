@@ -31,18 +31,19 @@ export const InvoiceDocument = forwardRef<
   return (
     <div
       ref={ref}
-      className="mx-auto w-full max-w-[820px] bg-white text-neutral-900"
+      className="invoice-doc mx-auto w-full max-w-[820px] bg-white text-neutral-900"
       style={{ padding: compact ? "24px 28px" : "40px 44px", fontFamily: "Inter, system-ui, sans-serif" }}
     >
       {/* Header */}
       <div
-        className="flex flex-wrap items-start justify-between gap-6 pb-5"
+        className="invoice-header avoid-break flex flex-wrap items-start justify-between gap-6 pb-5"
         style={{ borderBottom: `3px solid ${accent}` }}
       >
         <div className="flex items-start gap-4">
           {showLogo && (
             <img
               src={profile!.logo_url!}
+
               alt={profile?.company_name || "Logo"}
               style={{ maxHeight: compact ? 44 : 64, maxWidth: 180, objectFit: "contain" }}
             />
@@ -83,8 +84,8 @@ export const InvoiceDocument = forwardRef<
       )}
 
       {/* Parties + payment */}
-      <div className="grid gap-6 pt-6 sm:grid-cols-2">
-        <div>
+      <div className="invoice-parties avoid-break grid gap-6 pt-6 sm:grid-cols-2">
+        <div className="avoid-break">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: accent }}>
             Odběratel
           </p>
@@ -100,7 +101,7 @@ export const InvoiceDocument = forwardRef<
             <Row label="DPH" value={invoice.client_vat_payer ? "Plátce DPH" : "Neplátce DPH"} />
           </div>
         </div>
-        <div>
+        <div className="avoid-break">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: accent }}>
             Platební údaje
           </p>
@@ -127,35 +128,67 @@ export const InvoiceDocument = forwardRef<
       </div>
 
       {/* Items */}
-      <table className="mt-7 w-full border-collapse text-[13px]">
+      <table
+        className="mt-7 w-full border-collapse text-[12.5px]"
+        style={{ tableLayout: "fixed" }}
+      >
+        <colgroup>
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "34%" }} />
+          <col style={{ width: "11%" }} />
+          <col style={{ width: "12%" }} />
+          <col style={{ width: "14%" }} />
+          <col style={{ width: "12%" }} />
+          <col style={{ width: "16%" }} />
+        </colgroup>
         <thead>
-          <tr style={{ backgroundColor: `${accent}12` }}>
-            <th className="p-2 text-left font-semibold">Popis</th>
-            <th className="p-2 text-left font-semibold">Typ</th>
-            <th className="p-2 text-right font-semibold">Množství</th>
-            <th className="p-2 text-right font-semibold">Cena/j. bez DPH</th>
-            <th className="p-2 text-right font-semibold">DPH</th>
-            <th className="p-2 text-right font-semibold">Celkem s DPH</th>
+          <tr style={{ backgroundColor: `${accent}12`, borderBottom: `1.5px solid ${accent}` }}>
+            <th className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">#</th>
+            <th className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">Popis</th>
+            <th className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">Typ</th>
+            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">Množství</th>
+            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">
+              Cena/j. bez DPH
+            </th>
+            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">DPH</th>
+            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">
+              Celkem s DPH
+            </th>
           </tr>
         </thead>
         <tbody>
-          {items.map((it) => {
+          {items.map((it, index) => {
             const base = Number(it.quantity) * Number(it.unit_price);
             const vat = (base * Number(it.vat_rate)) / 100;
             return (
-              <tr key={it.id} style={{ borderBottom: "1px solid #e5e5e5" }}>
-                <td className="p-2 font-medium">{it.description}</td>
-                <td className="p-2">{ITEM_TYPE_LABELS[it.item_type] ?? it.item_type}</td>
-                <td className="p-2 text-right">
+              <tr
+                key={it.id}
+                className="avoid-break align-top"
+                style={{
+                  borderBottom: "1px solid #ececec",
+                  backgroundColor: index % 2 === 1 ? "#fafafa" : "transparent",
+                }}
+              >
+                <td className="px-2 py-2 text-neutral-400">{index + 1}</td>
+                <td className="px-2 py-2 font-medium" style={{ wordBreak: "break-word" }}>
+                  {it.description}
+                </td>
+                <td className="px-2 py-2 text-neutral-600">
+                  {ITEM_TYPE_LABELS[it.item_type] ?? it.item_type}
+                </td>
+                <td className="px-2 py-2 text-right tabular-nums">
                   {Number(it.quantity)} {it.unit}
                 </td>
-                <td className="p-2 text-right">
+                <td className="px-2 py-2 text-right tabular-nums">
                   {formatCurrency(Number(it.unit_price), invoice.currency)}
                 </td>
-                <td className="p-2 text-right">
-                  {Number(it.vat_rate)} % ({formatCurrency(vat, invoice.currency)})
+                <td className="px-2 py-2 text-right tabular-nums">
+                  <span className="block">{Number(it.vat_rate)} %</span>
+                  <span className="block text-[11px] text-neutral-500">
+                    {formatCurrency(vat, invoice.currency)}
+                  </span>
                 </td>
-                <td className="p-2 text-right font-medium">
+                <td className="px-2 py-2 text-right font-semibold tabular-nums">
                   {formatCurrency(base + vat, invoice.currency)}
                 </td>
               </tr>
@@ -165,17 +198,17 @@ export const InvoiceDocument = forwardRef<
       </table>
 
       {/* Totals */}
-      <div className="mt-6 flex justify-end">
+      <div className="avoid-break mt-6 flex justify-end">
         <div className="w-full max-w-[320px] space-y-1.5">
           <div className="flex justify-between text-[13px]">
             <span className="text-neutral-500">Cena bez DPH</span>
-            <span className="font-medium">
+            <span className="font-medium tabular-nums">
               {formatCurrency(Number(invoice.subtotal), invoice.currency)}
             </span>
           </div>
           <div className="flex justify-between text-[13px]">
             <span className="text-neutral-500">DPH celkem</span>
-            <span className="font-medium">
+            <span className="font-medium tabular-nums">
               {formatCurrency(Number(invoice.vat_amount), invoice.currency)}
             </span>
           </div>
@@ -184,21 +217,25 @@ export const InvoiceDocument = forwardRef<
             style={{ backgroundColor: accent }}
           >
             <span>Celkem k úhradě</span>
-            <span>{formatCurrency(Number(invoice.total), invoice.currency)}</span>
+            <span className="tabular-nums">
+              {formatCurrency(Number(invoice.total), invoice.currency)}
+            </span>
           </div>
         </div>
       </div>
 
       {invoice.note && (
-        <div className="mt-6 rounded-lg bg-neutral-50 p-3 text-[13px]">
+        <div className="avoid-break mt-6 rounded-lg bg-neutral-50 p-3 text-[13px]">
           <p className="text-[11px] uppercase tracking-wide text-neutral-500">Poznámka</p>
           <p className="mt-0.5 whitespace-pre-wrap">{invoice.note}</p>
         </div>
       )}
 
-      <div className="mt-8 border-t pt-3 text-center text-[11px] text-neutral-500">
+
+      <div className="avoid-break mt-8 border-t pt-3 text-center text-[11px] text-neutral-500">
         {profile?.invoice_footer || "Děkujeme za spolupráci."}
       </div>
+
     </div>
   );
 });
