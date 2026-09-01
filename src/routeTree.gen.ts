@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as NastaveniRouteImport } from './routes/nastaveni'
+import { Route as PrehledRouteImport } from './routes/prehled'
 import { Route as FakturyIndexRouteImport } from './routes/faktury.index'
 import { Route as FakturyNovaRouteImport } from './routes/faktury.nova'
 import { Route as FakturyIdIndexRouteImport } from './routes/faktury.$id.index'
@@ -30,6 +31,11 @@ const AuthRoute = AuthRouteImport.update({
 const NastaveniRoute = NastaveniRouteImport.update({
   id: '/nastaveni',
   path: '/nastaveni',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrehledRoute = PrehledRouteImport.update({
+  id: '/prehled',
+  path: '/prehled',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FakturyIndexRoute = FakturyIndexRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/nastaveni': typeof NastaveniRoute
+  '/prehled': typeof PrehledRoute
   '/faktury/nova': typeof FakturyNovaRoute
   '/faktury/': typeof FakturyIndexRoute
   '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/nastaveni': typeof NastaveniRoute
+  '/prehled': typeof PrehledRoute
   '/faktury/nova': typeof FakturyNovaRoute
   '/faktury': typeof FakturyIndexRoute
   '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/nastaveni': typeof NastaveniRoute
+  '/prehled': typeof PrehledRoute
   '/faktury/nova': typeof FakturyNovaRoute
   '/faktury/': typeof FakturyIndexRoute
   '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/nastaveni'
+    | '/prehled'
     | '/faktury/nova'
     | '/faktury/'
     | '/faktury/$id/upravit'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/nastaveni'
+    | '/prehled'
     | '/faktury/nova'
     | '/faktury'
     | '/faktury/$id/upravit'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/nastaveni'
+    | '/prehled'
     | '/faktury/nova'
     | '/faktury/'
     | '/faktury/$id/upravit'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   NastaveniRoute: typeof NastaveniRoute
+  PrehledRoute: typeof PrehledRoute
   FakturyNovaRoute: typeof FakturyNovaRoute
   FakturyIndexRoute: typeof FakturyIndexRoute
   FakturyIdUpravitRoute: typeof FakturyIdUpravitRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/nastaveni'
       fullPath: '/nastaveni'
       preLoaderRoute: typeof NastaveniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prehled': {
+      id: '/prehled'
+      path: '/prehled'
+      fullPath: '/prehled'
+      preLoaderRoute: typeof PrehledRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faktury/': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   NastaveniRoute: NastaveniRoute,
+  PrehledRoute: PrehledRoute,
   FakturyNovaRoute: FakturyNovaRoute,
   FakturyIndexRoute: FakturyIndexRoute,
   FakturyIdUpravitRoute: FakturyIdUpravitRoute,
