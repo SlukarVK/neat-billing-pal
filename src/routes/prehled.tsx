@@ -5,7 +5,7 @@ import { BarChart3, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
-import { downloadInvoicePdf } from "@/lib/invoice-pdf";
+import { downloadElementAsPdf } from "@/lib/invoice-pdf";
 import { formatCurrency, formatDate, STATUS_LABELS } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,7 +104,10 @@ function OverviewPage() {
     if (!reportRef.current) return;
     setExporting(true);
     try {
-      await downloadInvoicePdf(reportRef.current, `prehled-${new Date().toISOString().slice(0, 10)}`);
+      await downloadElementAsPdf(
+        reportRef.current,
+        `prehled-faktur-${new Date().toISOString().slice(0, 10)}.pdf`,
+      );
       toast.success("PDF přehledu bylo staženo.");
     } catch {
       toast.error("Export do PDF se nezdařil.");
@@ -145,7 +148,7 @@ function OverviewPage() {
     }
 
     XLSX.writeFile(wb, `prehled-faktur-${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Excel soubor byl staženo.");
+    toast.success("Excel soubor byl stažen.");
   };
 
   return (
