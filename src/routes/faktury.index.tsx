@@ -410,10 +410,21 @@ function InvoicesPage() {
                 if (file) importCsv.mutate(file);
               }}
             />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                downloadFile(sampleCsv(), "vzor-faktury.csv", "text/csv;charset=utf-8")
+              }
+            >
+              <Download className="mr-1.5 h-4 w-4" />
+              Stáhnout vzorové CSV
+            </Button>
             <p className="text-xs text-muted-foreground">
               Sloupce: {CSV_COLUMNS.join(", ")}
             </p>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setImportOpen(false)}>
               Zavřít
