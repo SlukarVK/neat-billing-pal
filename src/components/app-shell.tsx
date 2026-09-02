@@ -48,11 +48,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
+              <Link to="/navod">
+                <BookOpen className="mr-1.5 h-4 w-4" />
+                Návod
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
               <Link to="/nastaveni">
                 <Settings className="mr-1.5 h-4 w-4" />
                 Nastavení
               </Link>
             </Button>
+
             <Button size="sm" asChild className="shadow-pop">
               <Link to="/faktury/nova">
                 <Plus className="mr-1.5 h-4 w-4" />
