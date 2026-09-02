@@ -5,12 +5,15 @@ import { CheckCircle2, Download, FileText, Plus, Search, Trash2, Upload } from "
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
+import { DueAlerts } from "@/components/due-alerts";
 import {
   CSV_COLUMNS,
   downloadFile,
   formatCurrency,
   formatDate,
+  getDueInfo,
   parseCsv,
+  sampleCsv,
   STATUS_LABELS,
   toCsv,
 } from "@/lib/invoice-utils";
@@ -18,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
@@ -248,7 +252,10 @@ function InvoicesPage() {
         </div>
       </div>
 
+      <DueAlerts invoices={invoices ?? []} />
+
       <div className="mb-4 flex flex-wrap gap-3">
+
         <div className="relative min-w-64 flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -315,7 +322,26 @@ function InvoicesPage() {
                     </TableCell>
                     <TableCell>{inv.client_name}</TableCell>
                     <TableCell>{formatDate(inv.issue_date)}</TableCell>
-                    <TableCell>{formatDate(inv.due_date)}</TableCell>
+                    <TableCell>
+                      {formatDate(inv.due_date)}
+                      {(() => {
+                        const d = getDueInfo(inv);
+                        if (d.level === "overdue" || d.level === "soon" || d.level === "today")
+                          return (
+                            <span
+                              className={`ml-2 rounded px-1.5 py-0.5 text-xs ${
+                                d.level === "overdue"
+                                  ? "bg-destructive/10 text-destructive"
+                                  : "bg-primary/10 text-primary"
+                              }`}
+                            >
+                              {d.label}
+                            </span>
+                          );
+                        return null;
+                      })()}
+                    </TableCell>
+
                     <TableCell>
                       <Badge variant={statusVariant(inv.status)}>
                         {STATUS_LABELS[inv.status] ?? inv.status}
@@ -384,10 +410,21 @@ function InvoicesPage() {
                 if (file) importCsv.mutate(file);
               }}
             />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                downloadFile(sampleCsv(), "vzor-faktury.csv", "text/csv;charset=utf-8")
+              }
+            >
+              <Download className="mr-1.5 h-4 w-4" />
+              Stáhnout vzorové CSV
+            </Button>
             <p className="text-xs text-muted-foreground">
               Sloupce: {CSV_COLUMNS.join(", ")}
             </p>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setImportOpen(false)}>
               Zavřít
