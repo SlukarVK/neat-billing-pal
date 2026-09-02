@@ -5,12 +5,15 @@ import { CheckCircle2, Download, FileText, Plus, Search, Trash2, Upload } from "
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
+import { DueAlerts } from "@/components/due-alerts";
 import {
   CSV_COLUMNS,
   downloadFile,
   formatCurrency,
   formatDate,
+  getDueInfo,
   parseCsv,
+  sampleCsv,
   STATUS_LABELS,
   toCsv,
 } from "@/lib/invoice-utils";
@@ -18,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
