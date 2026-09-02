@@ -140,3 +140,77 @@ export function parseCsv(text: string): Record<string, string>[] {
   const keys = header.map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
   return body.map((r) => Object.fromEntries(keys.map((k, i) => [k, (r[i] ?? "").trim()])));
 }
+
+/* ---------- Splatnost ---------- */
+
+export const DUE_SOON_DAYS = 7;
+
+/** Počet dní do splatnosti (záporné = po splatnosti). */
+export function daysUntilDue(dueDate: string | null | undefined, today = new Date()): number {
+  if (!dueDate) return Number.POSITIVE_INFINITY;
+  const d = new Date(`${dueDate}T00:00:00`);
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((d.getTime() - t.getTime()) / 86_400_000);
+}
+
+export type DueLevel = "none" | "ok" | "soon" | "today" | "overdue";
+
+export interface DueInfo {
+  level: DueLevel;
+  days: number;
+  label: string;
+}
+
+/** Vyhodnotí splatnost faktury (zaplacené a stornované se nehlídají). */
+export function getDueInfo(
+  invoice: { due_date: string | null; status: string },
+  today = new Date(),
+): DueInfo {
+  if (invoice.status === "zaplacena" || invoice.status === "stornovana" || invoice.status === "navrh")
+    return { level: "none", days: 0, label: "" };
+  const days = daysUntilDue(invoice.due_date, today);
+  if (!Number.isFinite(days)) return { level: "none", days: 0, label: "" };
+  if (days < 0)
+    return { level: "overdue", days, label: `Po splatnosti ${Math.abs(days)} dní` };
+  if (days === 0) return { level: "today", days, label: "Splatnost je dnes" };
+  if (days <= DUE_SOON_DAYS)
+    return { level: "soon", days, label: `Splatnost za ${days} ${days === 1 ? "den" : days < 5 ? "dny" : "dní"}` };
+  return { level: "ok", days, label: `Splatnost za ${days} dní` };
+}
+
+/** Datum splatnosti = datum vystavení + počet dní. */
+export function addDays(dateIso: string, days: number): string {
+  const d = new Date(`${dateIso}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Vzorové CSV pro import. */
+export function sampleCsv() {
+  const today = new Date().toISOString().slice(0, 10);
+  return toCsv([
+    {
+      invoice_number: "2026-0001",
+      status: "vystavena",
+      client_name: "Ukázka s.r.o.",
+      client_address: "Náměstí 1, 110 00 Praha",
+      client_ico: "12345678",
+      client_dic: "CZ12345678",
+      client_phone: "+420 777 123 456",
+      client_email: "faktury@ukazka.cz",
+      client_vat_payer: "ano",
+      issue_date: today,
+      due_date: addDays(today, 14),
+      taxable_date: today,
+      paid_date: "",
+      payment_method: "prevod",
+      bank_account: "123456789/0100",
+      variable_symbol: "20260001",
+      currency: "CZK",
+      subtotal: "10000",
+      vat_amount: "2100",
+      total: "12100",
+      note: "Ukázkový řádek – smažte před importem vlastních dat.",
+    },
+  ]);
+}
