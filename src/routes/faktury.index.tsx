@@ -319,7 +319,26 @@ function InvoicesPage() {
                     </TableCell>
                     <TableCell>{inv.client_name}</TableCell>
                     <TableCell>{formatDate(inv.issue_date)}</TableCell>
-                    <TableCell>{formatDate(inv.due_date)}</TableCell>
+                    <TableCell>
+                      {formatDate(inv.due_date)}
+                      {(() => {
+                        const d = getDueInfo(inv);
+                        if (d.level === "overdue" || d.level === "soon" || d.level === "today")
+                          return (
+                            <span
+                              className={`ml-2 rounded px-1.5 py-0.5 text-xs ${
+                                d.level === "overdue"
+                                  ? "bg-destructive/10 text-destructive"
+                                  : "bg-primary/10 text-primary"
+                              }`}
+                            >
+                              {d.label}
+                            </span>
+                          );
+                        return null;
+                      })()}
+                    </TableCell>
+
                     <TableCell>
                       <Badge variant={statusVariant(inv.status)}>
                         {STATUS_LABELS[inv.status] ?? inv.status}
