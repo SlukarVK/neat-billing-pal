@@ -240,7 +240,27 @@ export function InvoiceForm({
               value={form.due_date}
               onChange={(e) => set("due_date", e.target.value)}
             />
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              {[7, 14, 30].map((d) => (
+                <Button
+                  key={d}
+                  type="button"
+                  size="sm"
+                  variant={form.due_date === addDays(form.issue_date, d) ? "secondary" : "outline"}
+                  className="h-7 px-2 text-xs"
+                  onClick={() => set("due_date", addDays(form.issue_date, d))}
+                >
+                  +{d} dní
+                </Button>
+              ))}
+              <span className="text-xs text-muted-foreground">
+                {daysUntilDue(form.due_date) >= 0
+                  ? `za ${daysUntilDue(form.due_date)} dní`
+                  : `${Math.abs(daysUntilDue(form.due_date))} dní po termínu`}
+              </span>
+            </div>
           </div>
+
           <div className="space-y-1.5">
             <Label>DUZP</Label>
             <Input
