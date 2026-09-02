@@ -5,7 +5,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { calcItemTotals, formatCurrency } from "@/lib/invoice-utils";
+import { addDays, calcItemTotals, daysUntilDue, formatCurrency } from "@/lib/invoice-utils";
 import { useCompanyProfile } from "@/lib/company-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
