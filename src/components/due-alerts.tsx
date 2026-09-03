@@ -1,12 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, CalendarClock } from "lucide-react";
-import { formatCurrency, formatDate, getDueInfo } from "@/lib/invoice-utils";
+import { AlertTriangle, CalendarClock, Mail } from "lucide-react";
+import {
+  buildReminderMailto,
+  formatCurrency,
+  formatDate,
+  getDueInfo,
+} from "@/lib/invoice-utils";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export interface DueAlertInvoice {
   id: string;
   invoice_number: string;
   client_name: string;
+  client_email?: string | null;
   status: string;
   due_date: string | null;
   total: number | string;
@@ -32,11 +39,27 @@ export function DueAlerts({ invoices }: { invoices: DueAlertInvoice[] }) {
       >
         {inv.invoice_number} · {inv.client_name}
       </Link>
-      <span className="text-xs opacity-80">
+      <span className="flex items-center gap-1 text-xs opacity-80">
         {label} · splatnost {formatDate(inv.due_date)} ·{" "}
         {formatCurrency(Number(inv.total), inv.currency)}
+        <a
+          href={buildReminderMailto([inv], inv.client_email)}
+          title="Poslat upomínku e-mailem"
+          className="rounded p-1 hover:bg-foreground/10"
+        >
+          <Mail className="h-3.5 w-3.5" />
+        </a>
       </span>
     </li>
+  );
+
+  const SendAll = ({ list }: { list: typeof evaluated }) => (
+    <Button asChild variant="outline" size="sm" className="mt-1">
+      <a href={buildReminderMailto(list.map((e) => e.inv))}>
+        <Mail className="mr-1.5 h-4 w-4" />
+        Poslat upomínku e-mailem
+      </a>
+    </Button>
   );
 
   return (
@@ -53,6 +76,7 @@ export function DueAlerts({ invoices }: { invoices: DueAlertInvoice[] }) {
                 <Row key={e.inv.id} inv={e.inv} label={e.due.label} />
               ))}
             </ul>
+            <SendAll list={overdue} />
           </CardContent>
         </Card>
       )}
@@ -68,6 +92,7 @@ export function DueAlerts({ invoices }: { invoices: DueAlertInvoice[] }) {
                 <Row key={e.inv.id} inv={e.inv} label={e.due.label} />
               ))}
             </ul>
+            <SendAll list={soon} />
           </CardContent>
         </Card>
       )}
