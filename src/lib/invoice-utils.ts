@@ -214,3 +214,56 @@ export function sampleCsv() {
     },
   ]);
 }
+
+/* ---------- Upomínky e-mailem ---------- */
+
+export interface ReminderInvoice {
+  id: string;
+  invoice_number: string;
+  client_name: string;
+  client_email?: string | null;
+  due_date: string | null;
+  status: string;
+  total: number | string;
+  currency: string;
+}
+
+/** Veřejný odkaz na detail faktury. */
+export function invoiceLink(id: string) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  return `${origin}/faktury/${id}`;
+}
+
+/** Sestaví mailto: odkaz s upomínkou na blížící se splatnost včetně odkazu na fakturu. */
+export function buildReminderMailto(invoices: ReminderInvoice[], to?: string | null) {
+  const single = invoices.length === 1 ? invoices[0]! : null;
+  const subject = single
+    ? `Upomínka: faktura ${single.invoice_number} – splatnost ${formatDate(single.due_date)}`
+    : `Upomínka: ${invoices.length} faktur před splatností`;
+
+  const lines = invoices.map((inv) => {
+    const due = getDueInfo(inv);
+    return [
+      `Faktura ${inv.invoice_number} — ${inv.client_name}`,
+      `Splatnost: ${formatDate(inv.due_date)}${due.label ? ` (${due.label})` : ""}`,
+      `Částka: ${formatCurrency(Number(inv.total), inv.currency)}`,
+      `Odkaz na fakturu: ${invoiceLink(inv.id)}`,
+    ].join("\n");
+  });
+
+  const body = [
+    "Dobrý den,",
+    "",
+    invoices.length === 1
+      ? "dovolujeme si upozornit na blížící se splatnost následující faktury:"
+      : "dovolujeme si upozornit na blížící se splatnost následujících faktur:",
+    "",
+    lines.join("\n\n"),
+    "",
+    "Děkujeme za včasnou úhradu.",
+    "",
+    "S pozdravem",
+  ].join("\n");
+
+  return `mailto:${to ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
