@@ -117,6 +117,64 @@
   box-shadow: var(--shadow-pop);
 }
 
+.invoice-doc {
+  padding: 24px 20px;
+}
+
+.invoice-doc[data-layout="compact"] {
+  padding: 20px 16px;
+}
+
+@media (max-width: 639px) {
+  .invoice-doc .invoice-col-secondary {
+    display: none;
+  }
+  .invoice-doc .invoice-col-description {
+    width: 25% !important;
+  }
+  .invoice-doc .invoice-col-quantity {
+    width: 14% !important;
+  }
+  .invoice-doc .invoice-col-price {
+    width: 20% !important;
+  }
+  .invoice-doc .invoice-col-vat {
+    width: 16% !important;
+  }
+  .invoice-doc .invoice-col-total {
+    width: 25% !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .invoice-doc {
+    padding: 40px 44px;
+  }
+  .invoice-doc[data-layout="compact"] {
+    padding: 24px 28px;
+  }
+}
+
+.invoice-export {
+  padding: 40px 44px !important;
+}
+
+.invoice-export[data-layout="compact"] {
+  padding: 24px 28px !important;
+}
+
+.invoice-export .invoice-header {
+  flex-direction: row !important;
+}
+
+.invoice-export .invoice-parties {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.invoice-export .invoice-col-secondary {
+  display: table-cell !important;
+}
+
 @media print {
   @page {
     size: A4 portrait;
@@ -144,7 +202,32 @@
   /* Přesné stránkování dokumentu faktury */
   .invoice-doc {
     padding: 0 !important;
+    width: 190mm !important;
     max-width: none !important;
+  }
+  .invoice-doc .invoice-header {
+    flex-direction: row !important;
+  }
+  .invoice-doc .invoice-parties {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .invoice-doc .invoice-col-secondary {
+    display: table-cell !important;
+  }
+  .invoice-doc .invoice-col-description {
+    width: 34% !important;
+  }
+  .invoice-doc .invoice-col-quantity {
+    width: 12% !important;
+  }
+  .invoice-doc .invoice-col-price {
+    width: 14% !important;
+  }
+  .invoice-doc .invoice-col-vat {
+    width: 12% !important;
+  }
+  .invoice-doc .invoice-col-total {
+    width: 16% !important;
   }
   .invoice-doc thead {
     display: table-header-group;

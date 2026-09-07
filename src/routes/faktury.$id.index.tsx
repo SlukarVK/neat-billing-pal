@@ -250,7 +250,7 @@ function InvoiceDetailPage() {
         .
       </p>
 
-      <Card className="print-area shadow-card">
+      <Card className="print-area overflow-hidden shadow-card">
         <CardContent className="p-0">
           <InvoiceDocument ref={docRef} invoice={invoice} items={items} profile={profile ?? null} />
         </CardContent>

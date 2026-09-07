@@ -22,9 +22,11 @@ export const InvoiceDocument = forwardRef<
   const showLogo = (profile?.pdf_show_logo ?? true) && !!profile?.logo_url;
 
   const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
-    <div className="flex justify-between gap-4 py-0.5">
-      <span className="text-[11px] uppercase tracking-wide text-neutral-500">{label}</span>
-      <span className="text-right text-[13px] font-medium text-neutral-900">{value || "—"}</span>
+    <div className="flex min-w-0 justify-between gap-3 py-0.5">
+      <span className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-500 sm:text-[11px]">{label}</span>
+      <span className="min-w-0 break-words text-right text-[12px] font-medium text-neutral-900 sm:text-[13px]">
+        {value || "—"}
+      </span>
     </div>
   );
 
@@ -32,14 +34,15 @@ export const InvoiceDocument = forwardRef<
     <div
       ref={ref}
       className="invoice-doc mx-auto w-full max-w-[820px] bg-white text-neutral-900"
-      style={{ padding: compact ? "24px 28px" : "40px 44px", fontFamily: "Inter, system-ui, sans-serif" }}
+      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+      data-layout={compact ? "compact" : "standard"}
     >
       {/* Header */}
       <div
-        className="invoice-header avoid-break flex flex-wrap items-start justify-between gap-6 pb-5"
+        className="invoice-header avoid-break flex flex-col items-start justify-between gap-4 pb-5 sm:flex-row sm:gap-6"
         style={{ borderBottom: `3px solid ${accent}` }}
       >
-        <div className="flex items-start gap-4">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           {showLogo && (
             <img
               src={profile!.logo_url!}
@@ -48,12 +51,12 @@ export const InvoiceDocument = forwardRef<
               style={{ maxHeight: compact ? 44 : 64, maxWidth: 180, objectFit: "contain" }}
             />
           )}
-          <div>
+           <div className="min-w-0">
             <p className="text-lg font-bold">{profile?.company_name || "Dodavatel"}</p>
             {profile?.address && (
               <p className="whitespace-pre-wrap text-[13px] text-neutral-600">{profile.address}</p>
             )}
-            <p className="text-[13px] text-neutral-600">
+            <p className="break-words text-[13px] text-neutral-600">
               {[profile?.ico && `IČO: ${profile.ico}`, profile?.dic && `DIČ: ${profile.dic}`]
                 .filter(Boolean)
                 .join(" · ")}
@@ -63,7 +66,7 @@ export const InvoiceDocument = forwardRef<
             </p>
           </div>
         </div>
-        <div className={classic ? "text-left" : "text-right"}>
+        <div className={classic ? "text-left" : "self-end text-right sm:self-auto"}>
           <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500">
             Faktura – daňový doklad
           </p>
@@ -129,29 +132,29 @@ export const InvoiceDocument = forwardRef<
 
       {/* Items */}
       <table
-        className="mt-7 w-full border-collapse text-[12.5px]"
+        className="invoice-items mt-7 w-full border-collapse text-[10px] sm:text-[12.5px]"
         style={{ tableLayout: "fixed" }}
       >
         <colgroup>
-          <col style={{ width: "5%" }} />
-          <col style={{ width: "34%" }} />
-          <col style={{ width: "11%" }} />
-          <col style={{ width: "12%" }} />
-          <col style={{ width: "14%" }} />
-          <col style={{ width: "12%" }} />
-          <col style={{ width: "16%" }} />
+          <col className="invoice-col-secondary" style={{ width: "5%" }} />
+          <col className="invoice-col-description" style={{ width: "34%" }} />
+          <col className="invoice-col-secondary" style={{ width: "11%" }} />
+          <col className="invoice-col-quantity" style={{ width: "12%" }} />
+          <col className="invoice-col-price" style={{ width: "14%" }} />
+          <col className="invoice-col-vat" style={{ width: "12%" }} />
+          <col className="invoice-col-total" style={{ width: "16%" }} />
         </colgroup>
         <thead>
           <tr style={{ backgroundColor: `${accent}12`, borderBottom: `1.5px solid ${accent}` }}>
-            <th className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">#</th>
-            <th className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">Popis</th>
-            <th className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">Typ</th>
-            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">Množství</th>
-            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">
+            <th className="invoice-col-secondary px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">#</th>
+            <th className="px-1 py-2 text-left text-[9px] font-semibold uppercase sm:px-2 sm:text-[11px]">Popis</th>
+            <th className="invoice-col-secondary px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wide">Typ</th>
+            <th className="px-1 py-2 text-right text-[9px] font-semibold uppercase sm:px-2 sm:text-[11px]">Množství</th>
+            <th className="px-1 py-2 text-right text-[9px] font-semibold uppercase sm:px-2 sm:text-[11px]">
               Cena/j. bez DPH
             </th>
-            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">DPH</th>
-            <th className="px-2 py-2 text-right text-[11px] font-semibold uppercase tracking-wide">
+            <th className="px-1 py-2 text-right text-[9px] font-semibold uppercase sm:px-2 sm:text-[11px]">DPH</th>
+            <th className="px-1 py-2 text-right text-[9px] font-semibold uppercase sm:px-2 sm:text-[11px]">
               Celkem s DPH
             </th>
           </tr>
@@ -169,26 +172,26 @@ export const InvoiceDocument = forwardRef<
                   backgroundColor: index % 2 === 1 ? "#fafafa" : "transparent",
                 }}
               >
-                <td className="px-2 py-2 text-neutral-400">{index + 1}</td>
-                <td className="px-2 py-2 font-medium" style={{ wordBreak: "break-word" }}>
+                <td className="invoice-col-secondary px-2 py-2 text-neutral-400">{index + 1}</td>
+                <td className="px-1 py-2 font-medium sm:px-2" style={{ wordBreak: "break-word" }}>
                   {it.description}
                 </td>
-                <td className="px-2 py-2 text-neutral-600">
+                <td className="invoice-col-secondary px-2 py-2 text-neutral-600">
                   {ITEM_TYPE_LABELS[it.item_type] ?? it.item_type}
                 </td>
-                <td className="px-2 py-2 text-right tabular-nums">
+                <td className="whitespace-nowrap px-1 py-2 text-right tabular-nums sm:px-2">
                   {Number(it.quantity)} {it.unit}
                 </td>
-                <td className="px-2 py-2 text-right tabular-nums">
+                <td className="whitespace-nowrap px-1 py-2 text-right tabular-nums sm:px-2">
                   {formatCurrency(Number(it.unit_price), invoice.currency)}
                 </td>
-                <td className="px-2 py-2 text-right tabular-nums">
+                <td className="px-1 py-2 text-right tabular-nums sm:px-2">
                   <span className="block">{Number(it.vat_rate)} %</span>
-                  <span className="block text-[11px] text-neutral-500">
+                  <span className="block text-[8px] text-neutral-500 sm:text-[11px]">
                     {formatCurrency(vat, invoice.currency)}
                   </span>
                 </td>
-                <td className="px-2 py-2 text-right font-semibold tabular-nums">
+                <td className="whitespace-nowrap px-1 py-2 text-right font-semibold tabular-nums sm:px-2">
                   {formatCurrency(base + vat, invoice.currency)}
                 </td>
               </tr>

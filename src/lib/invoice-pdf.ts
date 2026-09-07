@@ -11,7 +11,7 @@ function findBreak(data: Uint8ClampedArray, width: number, ideal: number, min: n
     const start = y * width * 4;
     for (let x = 0; x < width; x++) {
       const i = start + x * 4;
-      if (data[i]! < 245 || data[i + 1]! < 245 || data[i + 2]! < 245) return false;
+      if ((data[i] ?? 255) < 245 || (data[i + 1] ?? 255) < 245 || (data[i + 2] ?? 255) < 245) return false;
     }
     return true;
   };
@@ -24,11 +24,37 @@ function findBreak(data: Uint8ClampedArray, width: number, ideal: number, min: n
 /** Vykreslí DOM uzel (dokument faktury) do A4 PDF se správným stránkováním. */
 export async function elementToPdf(element: HTMLElement): Promise<jsPDF> {
   const { default: html2canvas } = await import("html2canvas-pro");
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    backgroundColor: "#ffffff",
-    useCORS: true,
-  });
+  const exportElement = element.cloneNode(true) as HTMLElement;
+  exportElement.classList.add("invoice-export");
+  exportElement.style.position = "fixed";
+  exportElement.style.left = "-10000px";
+  exportElement.style.top = "0";
+  exportElement.style.width = "820px";
+  exportElement.style.maxWidth = "none";
+  document.body.appendChild(exportElement);
+
+  let canvas: HTMLCanvasElement;
+  try {
+    await document.fonts.ready;
+    await Promise.all(
+      Array.from(exportElement.querySelectorAll("img")).map((image) =>
+        image.complete
+          ? Promise.resolve()
+          : new Promise<void>((resolve) => {
+              image.addEventListener("load", () => resolve(), { once: true });
+              image.addEventListener("error", () => resolve(), { once: true });
+            }),
+      ),
+    );
+    canvas = await html2canvas(exportElement, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      useCORS: true,
+      windowWidth: 1024,
+    });
+  } finally {
+    exportElement.remove();
+  }
 
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -61,7 +87,8 @@ export async function elementToPdf(element: HTMLElement): Promise<jsPDF> {
     const pageCanvas = document.createElement("canvas");
     pageCanvas.width = canvas.width;
     pageCanvas.height = sliceHeight;
-    const pctx = pageCanvas.getContext("2d")!;
+    const pctx = pageCanvas.getContext("2d");
+    if (!pctx) throw new Error("PDF canvas se nepodařilo vytvořit.");
     pctx.fillStyle = "#ffffff";
     pctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
     pctx.drawImage(canvas, 0, offset, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
