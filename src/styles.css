@@ -133,13 +133,13 @@
     width: 25% !important;
   }
   .invoice-doc .invoice-col-quantity {
-    width: 15% !important;
+    width: 14% !important;
   }
   .invoice-doc .invoice-col-price {
-    width: 21% !important;
+    width: 20% !important;
   }
   .invoice-doc .invoice-col-vat {
-    width: 14% !important;
+    width: 16% !important;
   }
   .invoice-doc .invoice-col-total {
     width: 25% !important;
@@ -213,6 +213,21 @@
   }
   .invoice-doc .invoice-col-secondary {
     display: table-cell !important;
+  }
+  .invoice-doc .invoice-col-description {
+    width: 34% !important;
+  }
+  .invoice-doc .invoice-col-quantity {
+    width: 12% !important;
+  }
+  .invoice-doc .invoice-col-price {
+    width: 14% !important;
+  }
+  .invoice-doc .invoice-col-vat {
+    width: 12% !important;
+  }
+  .invoice-doc .invoice-col-total {
+    width: 16% !important;
   }
   .invoice-doc thead {
     display: table-header-group;

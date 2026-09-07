@@ -187,7 +187,7 @@ export const InvoiceDocument = forwardRef<
                 </td>
                 <td className="px-1 py-2 text-right tabular-nums sm:px-2">
                   <span className="block">{Number(it.vat_rate)} %</span>
-                  <span className="block text-[11px] text-neutral-500">
+                  <span className="block text-[8px] text-neutral-500 sm:text-[11px]">
                     {formatCurrency(vat, invoice.currency)}
                   </span>
                 </td>
