@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { AppShell } from "@/components/app-shell";
 import { InvoiceDocument } from "@/components/invoice-document";
+import { InvoiceEntries } from "@/components/invoice-entries";
 import { useCompanyProfile } from "@/lib/company-profile";
 import { downloadInvoicePdf } from "@/lib/invoice-pdf";
 import { formatCurrency, STATUS_LABELS } from "@/lib/invoice-utils";
@@ -255,6 +256,12 @@ function InvoiceDetailPage() {
           <InvoiceDocument ref={docRef} invoice={invoice} items={items} profile={profile ?? null} />
         </CardContent>
       </Card>
+
+      <InvoiceEntries
+        invoiceId={invoice.id}
+        invoiceNumber={invoice.invoice_number}
+        currency={invoice.currency}
+      />
 
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
         <DialogContent>

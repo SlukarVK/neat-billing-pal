@@ -15,6 +15,13 @@
       "when": 1788083988054,
       "tag": "0001_company_profiles_and_invoice_status",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790955246417,
+      "tag": "0002_accounting_entries",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_entries: {
+        Row: {
+          account: string
+          amount: number
+          created_at: string
+          description: string
+          direction: string
+          entry_date: string
+          id: string
+          invoice_id: string | null
+          invoice_number: string | null
+          is_auto: boolean
+          user_id: string
+        }
+        Insert: {
+          account: string
+          amount?: number
+          created_at?: string
+          description: string
+          direction?: string
+          entry_date?: string
+          id?: string
+          invoice_id?: string | null
+          invoice_number?: string | null
+          is_auto?: boolean
+          user_id: string
+        }
+        Update: {
+          account?: string
+          amount?: number
+          created_at?: string
+          description?: string
+          direction?: string
+          entry_date?: string
+          id?: string
+          invoice_id?: string | null
+          invoice_number?: string | null
+          is_auto?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_entries_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_profiles: {
         Row: {
           address: string | null
