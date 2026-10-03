@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiUcetniRouteImport } from './routes/ai-ucetni'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DphRouteImport } from './routes/dph'
 import { Route as NastaveniRouteImport } from './routes/nastaveni'
@@ -25,6 +26,11 @@ import { Route as FakturyIdUpravitRouteImport } from './routes/faktury.$id.uprav
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiUcetniRoute = AiUcetniRouteImport.update({
+  id: '/ai-ucetni',
+  path: '/ai-ucetni',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -85,6 +91,7 @@ const FakturyIdUpravitRoute = FakturyIdUpravitRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
   '/nastaveni': typeof NastaveniRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
   '/nastaveni': typeof NastaveniRoute
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
   '/nastaveni': typeof NastaveniRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-ucetni'
     | '/auth'
     | '/dph'
     | '/nastaveni'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-ucetni'
     | '/auth'
     | '/dph'
     | '/nastaveni'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ai-ucetni'
     | '/auth'
     | '/dph'
     | '/nastaveni'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiUcetniRoute: typeof AiUcetniRoute
   AuthRoute: typeof AuthRoute
   DphRoute: typeof DphRoute
   NastaveniRoute: typeof NastaveniRoute
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-ucetni': {
+      id: '/ai-ucetni'
+      path: '/ai-ucetni'
+      fullPath: '/ai-ucetni'
+      preLoaderRoute: typeof AiUcetniRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -277,6 +297,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiUcetniRoute: AiUcetniRoute,
   AuthRoute: AuthRoute,
   DphRoute: DphRoute,
   NastaveniRoute: NastaveniRoute,
