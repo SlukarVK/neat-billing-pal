@@ -10,12 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiUcetniRouteImport } from './routes/ai-ucetni'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DphRouteImport } from './routes/dph'
 import { Route as NastaveniRouteImport } from './routes/nastaveni'
 import { Route as NavodRouteImport } from './routes/navod'
 import { Route as PrehledRouteImport } from './routes/prehled'
 import { Route as UctyRouteImport } from './routes/ucty'
+import { Route as ApiAiZauctovaniRouteImport } from './routes/api/ai-zauctovani'
 import { Route as FakturyIndexRouteImport } from './routes/faktury.index'
 import { Route as FakturyNovaRouteImport } from './routes/faktury.nova'
 import { Route as FakturyIdIndexRouteImport } from './routes/faktury.$id.index'
@@ -24,6 +26,11 @@ import { Route as FakturyIdUpravitRouteImport } from './routes/faktury.$id.uprav
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiUcetniRoute = AiUcetniRouteImport.update({
+  id: '/ai-ucetni',
+  path: '/ai-ucetni',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -56,6 +63,11 @@ const UctyRoute = UctyRouteImport.update({
   path: '/ucty',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiZauctovaniRoute = ApiAiZauctovaniRouteImport.update({
+  id: '/api/ai-zauctovani',
+  path: '/api/ai-zauctovani',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FakturyIndexRoute = FakturyIndexRouteImport.update({
   id: '/faktury/',
   path: '/faktury/',
@@ -79,12 +91,14 @@ const FakturyIdUpravitRoute = FakturyIdUpravitRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
   '/nastaveni': typeof NastaveniRoute
   '/navod': typeof NavodRoute
   '/prehled': typeof PrehledRoute
   '/ucty': typeof UctyRoute
+  '/api/ai-zauctovani': typeof ApiAiZauctovaniRoute
   '/faktury/nova': typeof FakturyNovaRoute
   '/faktury/': typeof FakturyIndexRoute
   '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
@@ -92,12 +106,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
   '/nastaveni': typeof NastaveniRoute
   '/navod': typeof NavodRoute
   '/prehled': typeof PrehledRoute
   '/ucty': typeof UctyRoute
+  '/api/ai-zauctovani': typeof ApiAiZauctovaniRoute
   '/faktury/nova': typeof FakturyNovaRoute
   '/faktury': typeof FakturyIndexRoute
   '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
@@ -106,12 +122,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
   '/nastaveni': typeof NastaveniRoute
   '/navod': typeof NavodRoute
   '/prehled': typeof PrehledRoute
   '/ucty': typeof UctyRoute
+  '/api/ai-zauctovani': typeof ApiAiZauctovaniRoute
   '/faktury/nova': typeof FakturyNovaRoute
   '/faktury/': typeof FakturyIndexRoute
   '/faktury/$id/upravit': typeof FakturyIdUpravitRoute
@@ -121,12 +139,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-ucetni'
     | '/auth'
     | '/dph'
     | '/nastaveni'
     | '/navod'
     | '/prehled'
     | '/ucty'
+    | '/api/ai-zauctovani'
     | '/faktury/nova'
     | '/faktury/'
     | '/faktury/$id/upravit'
@@ -134,12 +154,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-ucetni'
     | '/auth'
     | '/dph'
     | '/nastaveni'
     | '/navod'
     | '/prehled'
     | '/ucty'
+    | '/api/ai-zauctovani'
     | '/faktury/nova'
     | '/faktury'
     | '/faktury/$id/upravit'
@@ -147,12 +169,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ai-ucetni'
     | '/auth'
     | '/dph'
     | '/nastaveni'
     | '/navod'
     | '/prehled'
     | '/ucty'
+    | '/api/ai-zauctovani'
     | '/faktury/nova'
     | '/faktury/'
     | '/faktury/$id/upravit'
@@ -161,12 +185,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiUcetniRoute: typeof AiUcetniRoute
   AuthRoute: typeof AuthRoute
   DphRoute: typeof DphRoute
   NastaveniRoute: typeof NastaveniRoute
   NavodRoute: typeof NavodRoute
   PrehledRoute: typeof PrehledRoute
   UctyRoute: typeof UctyRoute
+  ApiAiZauctovaniRoute: typeof ApiAiZauctovaniRoute
   FakturyNovaRoute: typeof FakturyNovaRoute
   FakturyIndexRoute: typeof FakturyIndexRoute
   FakturyIdUpravitRoute: typeof FakturyIdUpravitRoute
@@ -180,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-ucetni': {
+      id: '/ai-ucetni'
+      path: '/ai-ucetni'
+      fullPath: '/ai-ucetni'
+      preLoaderRoute: typeof AiUcetniRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -224,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UctyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai-zauctovani': {
+      id: '/api/ai-zauctovani'
+      path: '/api/ai-zauctovani'
+      fullPath: '/api/ai-zauctovani'
+      preLoaderRoute: typeof ApiAiZauctovaniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faktury/': {
       id: '/faktury/'
       path: '/faktury'
@@ -257,12 +297,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiUcetniRoute: AiUcetniRoute,
   AuthRoute: AuthRoute,
   DphRoute: DphRoute,
   NastaveniRoute: NastaveniRoute,
   NavodRoute: NavodRoute,
   PrehledRoute: PrehledRoute,
   UctyRoute: UctyRoute,
+  ApiAiZauctovaniRoute: ApiAiZauctovaniRoute,
   FakturyNovaRoute: FakturyNovaRoute,
   FakturyIndexRoute: FakturyIndexRoute,
   FakturyIdUpravitRoute: FakturyIdUpravitRoute,
