@@ -278,7 +278,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      recalc_invoices_vat: {
+        Args: { _ids: string[]; _rate: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
