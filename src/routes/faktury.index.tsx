@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { VatRecalcDialog } from "@/components/vat-recalc-dialog";
 import { AppShell } from "@/components/app-shell";
 import { DueAlerts } from "@/components/due-alerts";
 import { downloadElementAsPdf } from "@/lib/invoice-pdf";
@@ -428,6 +429,9 @@ function InvoicesPage() {
             Zrušit filtry
           </Button>
         )}
+        <div className="ml-auto">
+          <VatRecalcDialog selectedIds={selected} />
+        </div>
       </div>
 
       {selected.length > 0 && (
