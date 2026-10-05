@@ -195,7 +195,7 @@ function VatPage() {
                 </tbody>
               </table>
               <p className="mt-3 text-xs text-muted-foreground">
-                DPH na vstupu (z přijatých faktur) můžete zapsat ručně jako zápis na účet 343 Má dáti —
+                DPH na vstupu se zapisuje automaticky ze stránky Přijaté faktury (účet 343 Má dáti) —
                 sníží částku k zaplacení.
               </p>
             </CardContent>

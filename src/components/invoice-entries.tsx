@@ -131,7 +131,7 @@ export function InvoiceEntries({
               {entries.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-4 text-center text-muted-foreground">
-                    Zatím žádné zápisy (návrhy a stornované faktury se nezaúčtovávají).
+                    Zatím žádné zápisy.
                   </td>
                 </tr>
               )}
