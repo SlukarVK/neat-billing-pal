@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, BookOpen, FileText, Landmark, LogOut, Percent, Plus, LayoutList, Settings, Sparkles } from "lucide-react";
+import { BarChart3, BookOpen, FileText, Inbox, Landmark, LogOut, Percent, Plus, LayoutList, Settings, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link to="/faktury">
                 <LayoutList className="mr-1.5 h-4 w-4" />
                 Faktury
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/prijate">
+                <Inbox className="mr-1.5 h-4 w-4" />
+                Přijaté
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>

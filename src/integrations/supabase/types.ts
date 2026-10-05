@@ -26,6 +26,7 @@ export type Database = {
           invoice_id: string | null
           invoice_number: string | null
           is_auto: boolean
+          received_invoice_id: string | null
           user_id: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           invoice_id?: string | null
           invoice_number?: string | null
           is_auto?: boolean
+          received_invoice_id?: string | null
           user_id: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           invoice_id?: string | null
           invoice_number?: string | null
           is_auto?: boolean
+          received_invoice_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -60,6 +63,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_entries_received_invoice_id_fkey"
+            columns: ["received_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "received_invoices"
             referencedColumns: ["id"]
           },
         ]
@@ -268,6 +278,69 @@ export type Database = {
           updated_at?: string
           user_id?: string
           variable_symbol?: string | null
+          vat_amount?: number
+          vat_rate?: number
+        }
+        Relationships: []
+      }
+      received_invoices: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_date: string | null
+          expense_account: string
+          id: string
+          invoice_number: string
+          issue_date: string
+          paid: boolean
+          paid_date: string | null
+          subtotal: number
+          supplier_dic: string | null
+          supplier_ico: string | null
+          supplier_name: string
+          taxable_date: string
+          total: number
+          user_id: string
+          vat_amount: number
+          vat_rate: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          expense_account?: string
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          paid?: boolean
+          paid_date?: string | null
+          subtotal?: number
+          supplier_dic?: string | null
+          supplier_ico?: string | null
+          supplier_name: string
+          taxable_date?: string
+          total?: number
+          user_id: string
+          vat_amount?: number
+          vat_rate?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          expense_account?: string
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          paid?: boolean
+          paid_date?: string | null
+          subtotal?: number
+          supplier_dic?: string | null
+          supplier_ico?: string | null
+          supplier_name?: string
+          taxable_date?: string
+          total?: number
+          user_id?: string
           vat_amount?: number
           vat_rate?: number
         }
