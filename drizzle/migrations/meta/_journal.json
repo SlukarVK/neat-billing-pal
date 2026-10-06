@@ -36,6 +36,13 @@
       "when": 1791237445291,
       "tag": "0004_received_invoices",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791325228715,
+      "tag": "0005_vat_account",
+      "breakpoints": true
     }
   ]
 }

@@ -220,6 +220,7 @@ export type Database = {
           updated_at: string
           user_id: string
           variable_symbol: string | null
+          vat_account: string
           vat_amount: number
           vat_rate: number
         }
@@ -249,6 +250,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           variable_symbol?: string | null
+          vat_account?: string
           vat_amount?: number
           vat_rate?: number
         }
@@ -278,6 +280,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           variable_symbol?: string | null
+          vat_account?: string
           vat_amount?: number
           vat_rate?: number
         }
@@ -301,6 +304,7 @@ export type Database = {
           taxable_date: string
           total: number
           user_id: string
+          vat_account: string
           vat_amount: number
           vat_rate: number
         }
@@ -321,6 +325,7 @@ export type Database = {
           taxable_date?: string
           total?: number
           user_id: string
+          vat_account?: string
           vat_amount?: number
           vat_rate?: number
         }
@@ -341,6 +346,7 @@ export type Database = {
           taxable_date?: string
           total?: number
           user_id?: string
+          vat_account?: string
           vat_amount?: number
           vat_rate?: number
         }
