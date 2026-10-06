@@ -38,7 +38,6 @@ function VatPage() {
       let invQ = supabase
         .from("invoices")
         .select("id, status, total, invoice_items(quantity, unit_price, vat_rate)")
-        .not("status", "in", "(navrh,storno)");
       let entQ = supabase.from("accounting_entries").select("account, direction, amount, entry_date");
       if (from) {
         invQ = invQ.gte("taxable_date", from);
