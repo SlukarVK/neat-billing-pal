@@ -41,6 +41,7 @@ const empty = {
   subtotal: "",
   vat_rate: "21",
   expense_account: "518",
+  vat_account: "343",
 };
 
 function ReceivedPage() {
@@ -87,6 +88,7 @@ function ReceivedPage() {
         vat_amount: vat,
         total: base + vat,
         expense_account: f.expense_account.trim() || "518",
+        vat_account: f.vat_account,
       });
       if (error) throw error;
     },
@@ -167,6 +169,17 @@ function ReceivedPage() {
             </div>
             {field("subtotal", "Základ bez DPH", { inputMode: "decimal" })}
             {field("vat_rate", "Sazba DPH %", { inputMode: "decimal" })}
+            <div className="space-y-1.5">
+              <Label>Účet DPH</Label>
+              <select
+                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                value={f.vat_account}
+                onChange={(e) => setF({ ...f, vat_account: e.target.value })}
+              >
+                <option value="343">343 – DPH</option>
+                <option value="341">341 – Daň z příjmů</option>
+              </select>
+            </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Popis</Label>
               <Input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />

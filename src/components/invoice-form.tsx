@@ -74,6 +74,7 @@ export function InvoiceForm({
     payment_method: invoice?.payment_method ?? "prevod",
     bank_account: invoice?.bank_account ?? "",
     variable_symbol: invoice?.variable_symbol ?? "",
+    vat_account: invoice?.vat_account ?? "343",
     currency: invoice?.currency ?? "CZK",
     note: invoice?.note ?? "",
   });
@@ -300,6 +301,17 @@ export function InvoiceForm({
               value={form.variable_symbol}
               onChange={(e) => set("variable_symbol", e.target.value)}
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Účet DPH</Label>
+            <select
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              value={form.vat_account}
+              onChange={(e) => set("vat_account", e.target.value)}
+            >
+              <option value="343">343 – DPH</option>
+              <option value="341">341 – Daň z příjmů</option>
+            </select>
           </div>
         </CardContent>
       </Card>

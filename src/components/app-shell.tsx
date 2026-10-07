@@ -66,6 +66,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
+              <Link to="/priznani">
+                <FileText className="mr-1.5 h-4 w-4" />
+                Přiznání
+                DPH
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
               <Link to="/ai-ucetni">
                 <Sparkles className="mr-1.5 h-4 w-4" />
                 AI
