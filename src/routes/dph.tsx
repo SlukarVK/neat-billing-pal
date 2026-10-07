@@ -110,7 +110,7 @@ function VatPage() {
     const s = accounts.find(([a]) => a === acc)?.[1];
     return s ? s.md - s.d : 0;
   };
-  const vatToPay = -bal("343");
+  const vatToPay = -(bal("343") + bal("341"));
   const toReceive = bal("311");
   const received = (data?.entries ?? [])
     .filter((e) => e.account === "221" && e.direction === "MD")
@@ -144,7 +144,7 @@ function VatPage() {
       ) : (
         <>
           <div className="mb-6 grid gap-4 sm:grid-cols-3">
-            <Stat label="DPH k zaplacení" value={formatCurrency(vatToPay)} hint="Zůstatek účtu 343" />
+            <Stat label="DPH k zaplacení" value={formatCurrency(vatToPay)} hint="Zůstatek účtů 343 a 341" />
             <Stat label="Přijde od klientů" value={formatCurrency(toReceive)} hint="Nezaplacené faktury (311)" />
             <Stat label="Již přijato" value={formatCurrency(received)} hint="Úhrady na účet 221" />
           </div>
