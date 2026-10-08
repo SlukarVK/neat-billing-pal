@@ -5,7 +5,7 @@ import { Download, Loader2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
-import { accountLabel, DIRECTION_LABELS } from "@/lib/accounting";
+import { useAccountNames, accountLabel, DIRECTION_LABELS } from "@/lib/accounting";
 import { formatCurrency, formatDate } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
