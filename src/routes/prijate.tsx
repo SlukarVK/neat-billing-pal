@@ -45,6 +45,8 @@ const empty = {
 };
 
 function ReceivedPage() {
+  const accountNames = useAccountNames();
+  void accountNames;
   const { user } = useAuth();
   const qc = useQueryClient();
   const [f, setF] = useState(empty);

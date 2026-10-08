@@ -20,6 +20,7 @@ export function InvoiceEntries({
   invoiceNumber: string;
   currency: string;
 }) {
+  const accountNames = useAccountNames();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [form, setForm] = useState({

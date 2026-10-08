@@ -26,6 +26,8 @@ export const Route = createFileRoute("/ucty")({
 });
 
 function AccountsPage() {
+  const accountNames = useAccountNames();
+  void accountNames;
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [selected, setSelected] = useState<string | null>(null);

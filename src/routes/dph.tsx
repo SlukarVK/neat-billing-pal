@@ -24,6 +24,8 @@ export const Route = createFileRoute("/dph")({
 });
 
 function VatPage() {
+  const accountNames = useAccountNames();
+  void accountNames;
   const now = new Date();
   const [from, setFrom] = useState(
     new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("sv-SE"),
