@@ -4,7 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { ACCOUNT_NAMES, accountLabel, DIRECTION_LABELS } from "@/lib/accounting";
+import { useAccountNames, accountLabel, DIRECTION_LABELS } from "@/lib/accounting";
 import { formatCurrency, formatDate } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ export function InvoiceEntries({
   invoiceNumber: string;
   currency: string;
 }) {
+  const accountNames = useAccountNames();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [form, setForm] = useState({
@@ -168,7 +169,7 @@ export function InvoiceEntries({
             onChange={(e) => setForm({ ...form, account: e.target.value })}
           />
           <datalist id="account-list">
-            {Object.entries(ACCOUNT_NAMES).map(([k, v]) => (
+            {Object.entries(accountNames).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
               </option>

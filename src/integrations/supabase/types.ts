@@ -74,6 +74,33 @@ export type Database = {
           },
         ]
       }
+      company_accounts: {
+        Row: {
+          account: string
+          category: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          account: string
+          category?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          account?: string
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       company_profiles: {
         Row: {
           address: string | null

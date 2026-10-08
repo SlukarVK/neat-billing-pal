@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
-import { ACCOUNT_NAMES } from "@/lib/accounting";
+import { useAccountNames } from "@/lib/accounting";
 import { formatCurrency, formatDate } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +45,8 @@ const empty = {
 };
 
 function ReceivedPage() {
+  const accountNames = useAccountNames();
+  void accountNames;
   const { user } = useAuth();
   const qc = useQueryClient();
   const [f, setF] = useState(empty);
@@ -158,7 +160,7 @@ function ReceivedPage() {
                 onChange={(e) => setF({ ...f, expense_account: e.target.value })}
               />
               <datalist id="exp-accounts">
-                {Object.entries(ACCOUNT_NAMES)
+                {Object.entries(accountNames)
                   .filter(([k]) => k.startsWith("5"))
                   .map(([k, v]) => (
                     <option key={k} value={k}>

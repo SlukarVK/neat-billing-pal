@@ -13,8 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AiUcetniRouteImport } from './routes/ai-ucetni'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DphRouteImport } from './routes/dph'
+import { Route as KontrolniHlaseniRouteImport } from './routes/kontrolni-hlaseni'
 import { Route as NastaveniRouteImport } from './routes/nastaveni'
 import { Route as NavodRouteImport } from './routes/navod'
+import { Route as OsnovaRouteImport } from './routes/osnova'
 import { Route as PrehledRouteImport } from './routes/prehled'
 import { Route as PrijateRouteImport } from './routes/prijate'
 import { Route as PriznaniRouteImport } from './routes/priznani'
@@ -45,6 +47,11 @@ const DphRoute = DphRouteImport.update({
   path: '/dph',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KontrolniHlaseniRoute = KontrolniHlaseniRouteImport.update({
+  id: '/kontrolni-hlaseni',
+  path: '/kontrolni-hlaseni',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NastaveniRoute = NastaveniRouteImport.update({
   id: '/nastaveni',
   path: '/nastaveni',
@@ -53,6 +60,11 @@ const NastaveniRoute = NastaveniRouteImport.update({
 const NavodRoute = NavodRouteImport.update({
   id: '/navod',
   path: '/navod',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OsnovaRoute = OsnovaRouteImport.update({
+  id: '/osnova',
+  path: '/osnova',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrehledRoute = PrehledRouteImport.update({
@@ -106,8 +118,10 @@ export interface FileRoutesByFullPath {
   '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
+  '/kontrolni-hlaseni': typeof KontrolniHlaseniRoute
   '/nastaveni': typeof NastaveniRoute
   '/navod': typeof NavodRoute
+  '/osnova': typeof OsnovaRoute
   '/prehled': typeof PrehledRoute
   '/prijate': typeof PrijateRoute
   '/priznani': typeof PriznaniRoute
@@ -123,8 +137,10 @@ export interface FileRoutesByTo {
   '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
+  '/kontrolni-hlaseni': typeof KontrolniHlaseniRoute
   '/nastaveni': typeof NastaveniRoute
   '/navod': typeof NavodRoute
+  '/osnova': typeof OsnovaRoute
   '/prehled': typeof PrehledRoute
   '/prijate': typeof PrijateRoute
   '/priznani': typeof PriznaniRoute
@@ -141,8 +157,10 @@ export interface FileRoutesById {
   '/ai-ucetni': typeof AiUcetniRoute
   '/auth': typeof AuthRoute
   '/dph': typeof DphRoute
+  '/kontrolni-hlaseni': typeof KontrolniHlaseniRoute
   '/nastaveni': typeof NastaveniRoute
   '/navod': typeof NavodRoute
+  '/osnova': typeof OsnovaRoute
   '/prehled': typeof PrehledRoute
   '/prijate': typeof PrijateRoute
   '/priznani': typeof PriznaniRoute
@@ -160,8 +178,10 @@ export interface FileRouteTypes {
     | '/ai-ucetni'
     | '/auth'
     | '/dph'
+    | '/kontrolni-hlaseni'
     | '/nastaveni'
     | '/navod'
+    | '/osnova'
     | '/prehled'
     | '/prijate'
     | '/priznani'
@@ -177,8 +197,10 @@ export interface FileRouteTypes {
     | '/ai-ucetni'
     | '/auth'
     | '/dph'
+    | '/kontrolni-hlaseni'
     | '/nastaveni'
     | '/navod'
+    | '/osnova'
     | '/prehled'
     | '/prijate'
     | '/priznani'
@@ -194,8 +216,10 @@ export interface FileRouteTypes {
     | '/ai-ucetni'
     | '/auth'
     | '/dph'
+    | '/kontrolni-hlaseni'
     | '/nastaveni'
     | '/navod'
+    | '/osnova'
     | '/prehled'
     | '/prijate'
     | '/priznani'
@@ -212,8 +236,10 @@ export interface RootRouteChildren {
   AiUcetniRoute: typeof AiUcetniRoute
   AuthRoute: typeof AuthRoute
   DphRoute: typeof DphRoute
+  KontrolniHlaseniRoute: typeof KontrolniHlaseniRoute
   NastaveniRoute: typeof NastaveniRoute
   NavodRoute: typeof NavodRoute
+  OsnovaRoute: typeof OsnovaRoute
   PrehledRoute: typeof PrehledRoute
   PrijateRoute: typeof PrijateRoute
   PriznaniRoute: typeof PriznaniRoute
@@ -255,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DphRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kontrolni-hlaseni': {
+      id: '/kontrolni-hlaseni'
+      path: '/kontrolni-hlaseni'
+      fullPath: '/kontrolni-hlaseni'
+      preLoaderRoute: typeof KontrolniHlaseniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nastaveni': {
       id: '/nastaveni'
       path: '/nastaveni'
@@ -267,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/navod'
       fullPath: '/navod'
       preLoaderRoute: typeof NavodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/osnova': {
+      id: '/osnova'
+      path: '/osnova'
+      fullPath: '/osnova'
+      preLoaderRoute: typeof OsnovaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prehled': {
@@ -340,8 +380,10 @@ const rootRouteChildren: RootRouteChildren = {
   AiUcetniRoute: AiUcetniRoute,
   AuthRoute: AuthRoute,
   DphRoute: DphRoute,
+  KontrolniHlaseniRoute: KontrolniHlaseniRoute,
   NastaveniRoute: NastaveniRoute,
   NavodRoute: NavodRoute,
+  OsnovaRoute: OsnovaRoute,
   PrehledRoute: PrehledRoute,
   PrijateRoute: PrijateRoute,
   PriznaniRoute: PriznaniRoute,

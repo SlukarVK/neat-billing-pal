@@ -2,6 +2,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
+  ClipboardList,
+  ListOrdered,
   BookOpen,
   FileText,
   Inbox,
@@ -26,8 +28,10 @@ const NAV = [
   { to: "/ucty", label: "Účty", icon: Landmark },
   { to: "/dph", label: "DPH", icon: Percent },
   { to: "/priznani", label: "Přiznání DPH", icon: FileText },
+  { to: "/kontrolni-hlaseni", label: "Kontrolní hlášení", icon: ClipboardList },
   { to: "/ai-ucetni", label: "AI asistent", icon: Sparkles },
   { to: "/navod", label: "Návod", icon: BookOpen },
+  { to: "/osnova", label: "Účty firmy", icon: ListOrdered },
   { to: "/nastaveni", label: "Nastavení", icon: Settings },
 ] as const;
 
