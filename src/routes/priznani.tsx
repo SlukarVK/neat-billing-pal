@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { downloadElementAsPdf } from "@/lib/invoice-pdf";
+import { toast } from "sonner";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileDown, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +38,34 @@ function ReturnPage() {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
   const { data: profile } = useCompanyProfile();
+  const docRef = useRef<HTMLDivElement>(null);
+  const [attach, setAttach] = useState(true);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  type Iss = { invoice_number: string; client_name: string; taxable_date: string; subtotal: number; vat_amount: number; total: number };
+  type Rec = { invoice_number: string; supplier_name: string; taxable_date: string; subtotal: number; vat_amount: number; total: number };
+  const [issued, setIssued] = useState<Iss[]>([]);
+  const [received, setReceived] = useState<Rec[]>([]);
+  const generate = async () => {
+    const [a, b] = await Promise.all([
+      supabase.from("invoices").select("invoice_number, client_name, taxable_date, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
+      supabase.from("received_invoices").select("invoice_number, supplier_name, taxable_date, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
+    ]);
+    setIssued(a.data ?? []);
+    setReceived(b.data ?? []);
+    setGenerated(true);
+  };
+  const savePdf = async () => {
+    if (!docRef.current) return;
+    setPdfBusy(true);
+    try {
+      await downloadElementAsPdf(docRef.current, `priznani-dph-${from}-${to}.pdf`);
+      toast.success("Přiznání bylo uloženo jako PDF.");
+    } catch {
+      toast.error("PDF se nepodařilo vytvořit.");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
 
   const prefill = async () => {
     setLoading(true);
@@ -131,7 +161,11 @@ function ReturnPage() {
               ))}
             </tbody>
           </table>
-          <Button onClick={() => setGenerated(true)}>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={attach} onChange={(e) => setAttach(e.target.checked)} />
+            Přiložit seznam vydaných a přijatých faktur za období
+          </label>
+          <Button onClick={generate}>
             <FileDown className="mr-1.5 h-4 w-4" /> Vygenerovat přiznání
           </Button>
         </CardContent>
@@ -139,7 +173,8 @@ function ReturnPage() {
 
       {generated && (
         <Card className="print-area shadow-card">
-          <CardContent className="space-y-4 p-8">
+          <CardContent className="p-0">
+          <div ref={docRef} className="space-y-4 bg-card p-8">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Přiznání k dani z přidané hodnoty</h2>
@@ -147,9 +182,14 @@ function ReturnPage() {
                   Zdaňovací období {formatDate(from)} – {formatDate(to)}
                 </p>
               </div>
-              <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}>
-                <Printer className="mr-1.5 h-4 w-4" /> Tisk / PDF
-              </Button>
+              <div className="flex gap-2 print:hidden" data-html2canvas-ignore>
+                <Button size="sm" onClick={savePdf} disabled={pdfBusy}>
+                  <FileDown className="mr-1.5 h-4 w-4" /> {pdfBusy ? "Ukládám…" : "Uložit PDF"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
+                  <Printer className="mr-1.5 h-4 w-4" /> Tisk
+                </Button>
+              </div>
             </div>
             <div className="text-sm">
               <p className="font-semibold">{profile?.company_name || "—"}</p>
@@ -197,9 +237,60 @@ function ReturnPage() {
             <p className="text-xs text-muted-foreground">
               Orientační podklad pro přiznání k DPH. Oficiální podání proveďte přes portál finanční správy.
             </p>
+            {attach && (
+              <>
+                <AttachTable title="Příloha 1 – Vydané faktury" partner="Odběratel" rows={issued.map((i) => ({ ...i, partner: i.client_name }))} />
+                <AttachTable title="Příloha 2 – Přijaté faktury" partner="Dodavatel" rows={received.map((i) => ({ ...i, partner: i.supplier_name }))} />
+              </>
+            )}
+          </div>
           </CardContent>
         </Card>
       )}
     </AppShell>
+  );
+}
+
+function AttachTable({ title, partner, rows }: { title: string; partner: string; rows: { invoice_number: string; partner: string; taxable_date: string; subtotal: number; vat_amount: number; total: number }[] }) {
+  const sum = (k: "subtotal" | "vat_amount" | "total") => rows.reduce((s, r) => s + Number(r[k]), 0);
+  return (
+    <div className="pt-4">
+      <h3 className="mb-2 font-semibold">{title}</h3>
+      <table className="w-full border text-sm">
+        <thead className="bg-muted text-left">
+          <tr>
+            <th className="border px-2 py-1">Číslo</th>
+            <th className="border px-2 py-1">{partner}</th>
+            <th className="border px-2 py-1">DUZP</th>
+            <th className="border px-2 py-1 text-right">Základ</th>
+            <th className="border px-2 py-1 text-right">DPH</th>
+            <th className="border px-2 py-1 text-right">Celkem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i}>
+              <td className="border px-2 py-1">{r.invoice_number}</td>
+              <td className="border px-2 py-1">{r.partner}</td>
+              <td className="border px-2 py-1 whitespace-nowrap">{formatDate(r.taxable_date)}</td>
+              <td className="border px-2 py-1 text-right whitespace-nowrap">{formatCurrency(Number(r.subtotal))}</td>
+              <td className="border px-2 py-1 text-right whitespace-nowrap">{formatCurrency(Number(r.vat_amount))}</td>
+              <td className="border px-2 py-1 text-right whitespace-nowrap">{formatCurrency(Number(r.total))}</td>
+            </tr>
+          ))}
+          {!rows.length && (
+            <tr><td colSpan={6} className="border px-2 py-2 text-center text-muted-foreground">Žádné faktury v období.</td></tr>
+          )}
+          {rows.length > 0 && (
+            <tr className="font-semibold">
+              <td className="border px-2 py-1" colSpan={3}>Celkem</td>
+              <td className="border px-2 py-1 text-right">{formatCurrency(sum("subtotal"))}</td>
+              <td className="border px-2 py-1 text-right">{formatCurrency(sum("vat_amount"))}</td>
+              <td className="border px-2 py-1 text-right">{formatCurrency(sum("total"))}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }
