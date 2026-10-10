@@ -45,7 +45,7 @@ function KhPage() {
       supabase.from("received_invoices").select("invoice_number, supplier_name, supplier_dic, taxable_date, vat_rate, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
     ]);
     setBusy(false);
-    if (inv.error || rec.error) return toast.error("Faktury se nepodařilo načíst.");
+    if (inv.error || rec.error) { toast.error("Faktury se nepodařilo načíst."); return; }
     const iss: Row[] = (inv.data ?? []).filter((i) => Number(i.vat_amount) !== 0).map((i) => ({ number: i.invoice_number, partner: i.client_name, dic: i.client_dic, date: i.taxable_date, rate: Number(i.vat_rate), base: Number(i.subtotal), vat: Number(i.vat_amount), total: Number(i.total) }));
     const rc: Row[] = (rec.data ?? []).filter((i) => Number(i.vat_amount) !== 0).map((i) => ({ number: i.invoice_number, partner: i.supplier_name, dic: i.supplier_dic, date: i.taxable_date, rate: Number(i.vat_rate), base: Number(i.subtotal), vat: Number(i.vat_amount), total: Number(i.total) }));
     const big = (r: Row) => r.total > LIMIT && !!r.dic;

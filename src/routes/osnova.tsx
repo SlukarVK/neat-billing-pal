@@ -68,7 +68,7 @@ function ChartPage() {
           <CardDescription>Když zadáte číslo, které už existuje, jeho název a zařazení se přepíšou.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-3 sm:grid-cols-[140px_1fr_220px_auto]" onSubmit={(e) => { e.preventDefault(); if (!f.account.trim() || !f.name.trim()) return toast.error("Vyplňte číslo i název účtu."); save.mutate([{ ...f, account: f.account.trim(), name: f.name.trim() }]); }}>
+          <form className="grid gap-3 sm:grid-cols-[140px_1fr_220px_auto]" onSubmit={(e) => { e.preventDefault(); if (!f.account.trim() || !f.name.trim()) { toast.error("Vyplňte číslo i název účtu."); return; } save.mutate([{ ...f, account: f.account.trim(), name: f.name.trim() }]); }}>
             <Input placeholder="Číslo, např. 311100" value={f.account} onChange={(e) => setF({ ...f, account: e.target.value, category: f.category === "ostatni" ? guessCat(e.target.value) : f.category })} />
             <Input placeholder="Název účtu" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
             <select className="h-10 rounded-md border border-input bg-background px-2 text-sm" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
