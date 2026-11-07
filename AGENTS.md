@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep company posting defaults and report account references in `src/lib/accounting-rules.ts`; reports derive tax figures from stored invoices, not account names or balances, because invoice data retains tax rates and partner details.
+- Keep VAT calendar boundaries and period navigation in `src/lib/vat-period.ts`; update each period atomically and use the same bounds for queries and exports to prevent partial-quarter or stale exports.

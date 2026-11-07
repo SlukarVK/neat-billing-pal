@@ -175,6 +175,19 @@
   display: table-cell !important;
 }
 
+.vat-report.invoice-export .overflow-x-auto {
+  overflow: visible;
+}
+
+.vat-report.invoice-export .shadow-card {
+  box-shadow: none;
+}
+
+.vat-report.invoice-export table {
+  table-layout: auto;
+  width: 100%;
+}
+
 @media print {
   @page {
     size: A4 portrait;

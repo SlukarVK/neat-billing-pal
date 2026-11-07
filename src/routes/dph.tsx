@@ -1,22 +1,26 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { FileDown, FileSpreadsheet, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
+import { VatPeriodControls, VAT_MONTHS } from "@/components/vat-period-controls";
 import { useAccountNames, accountLabel } from "@/lib/accounting";
 import { vatAccountSummary } from "@/lib/accounting-rules";
-import { formatCurrency } from "@/lib/invoice-utils";
+import { formatCurrency, formatDate } from "@/lib/invoice-utils";
+import { calendarPeriod, isValidVatRange, vatExportName } from "@/lib/vat-period";
+import { downloadElementAsPdf } from "@/lib/invoice-pdf";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/dph")({
   head: () => ({
     meta: [
       { title: "Vyúčtování DPH — Accountrix" },
-      { name: "description", content: "DPH podle sazeb, zůstatky účtů, kolik zaplatit a kolik přijde." },
+      { name: "description", content: "Měsíční a čtvrtletní DPH podle sazeb a účtů s exportem do PDF a Excelu." },
       { property: "og:title", content: "Vyúčtování DPH — Accountrix" },
-      { property: "og:description", content: "DPH podle sazeb, zůstatky účtů, kolik zaplatit a kolik přijde." },
+      { property: "og:description", content: "Měsíční a čtvrtletní vyúčtování DPH s exportem do PDF a Excelu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -28,15 +32,16 @@ function VatPage() {
   const accountNames = useAccountNames();
   void accountNames;
   const now = new Date();
-  const [from, setFrom] = useState(
-    new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("sv-SE"),
-  );
-  const [to, setTo] = useState(
-    new Date(now.getFullYear(), now.getMonth() + 1, 0).toLocaleDateString("sv-SE"),
-  );
+  const [period, setPeriod] = useState(() => calendarPeriod(now.getFullYear(), now.getMonth() + 1));
+  const { from, to } = period;
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState<"pdf" | "xlsx" | null>(null);
+  const validPeriod = isValidVatRange(from, to);
+  const periodLabel = period.mode === "quarter" ? `${period.quarter}. čtvrtletí ${period.year}` : period.mode === "month" ? `${VAT_MONTHS[period.month - 1]} ${period.year}` : "Vlastní období";
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["vat-report", from, to],
+    enabled: validPeriod,
     queryFn: async () => {
       let invQ = supabase
         .from("invoices")
@@ -122,32 +127,80 @@ function VatPage() {
   const totalBase = byRate.reduce((s, [, v]) => s + v.base, 0);
   const issuedAccounts = (rate?: number) => vatAccountSummary("issued", (data?.invoices ?? []).filter((invoice) => rate === undefined || invoice.invoice_items.some((item) => Number(item.vat_rate) === rate)));
   const receivedAccounts = (rate?: number) => vatAccountSummary("received", (data?.received ?? []).filter((invoice) => rate === undefined || Number(invoice.vat_rate) === rate));
+  const returnLines = [
+    { r: "1", d: "Uskutečněná plnění – základní sazba 21 %", accounts: issuedAccounts(21), b: ret.out.b21, v: ret.out.v21 },
+    { r: "2", d: "Uskutečněná plnění – snížená sazba 12 %", accounts: issuedAccounts(12), b: ret.out.b12, v: ret.out.v12 },
+    { r: "26", d: "Plnění osvobozená / bez daně (0 %)", accounts: "602 D", b: ret.out.b0 },
+    { r: "40", d: "Odpočet – přijatá plnění 21 % (můžete odečíst)", accounts: receivedAccounts(21), b: ret.inp.b21, v: ret.inp.v21, highlight: true },
+    { r: "41", d: "Odpočet – přijatá plnění 12 % (můžete odečíst)", accounts: receivedAccounts(12), b: ret.inp.b12, v: ret.inp.v12, highlight: true },
+    { r: "46", d: "Odpočet daně celkem", accounts: receivedAccounts(), v: ret.inVat, highlight: true },
+    { r: "62", d: "Daň na výstupu celkem", accounts: issuedAccounts(), v: ret.outVat },
+    { r: ret.result >= 0 ? "64" : "65", d: ret.result >= 0 ? "Vlastní daňová povinnost (zaplatit)" : "Nadměrný odpočet (vrátí se)", v: Math.abs(ret.result) },
+  ];
+  const exportDisabled = !validPeriod || !data || isFetching || Boolean(error) || exporting !== null;
+  const exportPdf = async () => {
+    if (!reportRef.current || exportDisabled) return;
+    setExporting("pdf");
+    try {
+      await downloadElementAsPdf(reportRef.current, `${vatExportName(period)}.pdf`);
+      toast.success("Přehled DPH byl uložen jako PDF.");
+    } catch { toast.error("PDF se nepodařilo vytvořit."); }
+    finally { setExporting(null); }
+  };
+  const exportXlsx = async () => {
+    if (exportDisabled) return;
+    setExporting("xlsx");
+    try {
+      const XLSX = await import("xlsx");
+      const wb = XLSX.utils.book_new();
+      const metadata = [
+        ["Accountrix — Vyúčtování DPH"], ["Období", periodLabel], ["Od", from], ["Do", to],
+      ];
+      const summary = XLSX.utils.aoa_to_sheet([...metadata, [], ["Ukazatel", "Částka (CZK)"],
+        ["Daň na výstupu", ret.outVat], ["Odpočet daně", ret.inVat], ["Výsledek (výstup − odpočet)", ret.result],
+        ["DPH k zaplacení — účty 343 a 341", vatToPay], ["Přijde od klientů — účet 311", toReceive], ["Již přijato — účet 221", received],
+      ]);
+      XLSX.utils.book_append_sheet(wb, summary, "Souhrn");
+      const addSheet = (name: string, rows: (string | number)[][]) => {
+        const sheet = XLSX.utils.aoa_to_sheet([...metadata, [], ...rows]);
+        sheet["!cols"] = [{ wch: 12 }, { wch: 60 }, { wch: 30 }, { wch: 20 }, { wch: 20 }];
+        XLSX.utils.book_append_sheet(wb, sheet, name);
+      };
+      addSheet("Přiznání DPH", [["Řádek", "Popis", "Účty základu / DPH", "Základ (CZK)", "Daň (CZK)"], ...returnLines.map((line) => [line.r, line.d, line.accounts ?? "", line.b ?? "", line.v ?? ""])]);
+      addSheet("DPH podle sazeb", [["Sazba (%)", "Základ (CZK)", "DPH (CZK)", "Celkem (CZK)"], ...byRate.map(([rate, value]) => [rate, value.base, value.vat, value.base + value.vat]), ["Celkem", totalBase, totalVat, totalBase + totalVat]]);
+      addSheet("Zůstatky účtů", [["Účet", "Název", "Má dáti (CZK)", "Dal (CZK)", "Zůstatek (CZK)"], ...accounts.map(([account, value]) => [account, accountNames[account] ?? account, value.md, value.d, value.md - value.d])]);
+      XLSX.writeFile(wb, `${vatExportName(period)}.xlsx`);
+      toast.success("Přehled DPH byl uložen do Excelu.");
+    } catch { toast.error("Export do Excelu se nezdařil."); }
+    finally { setExporting(null); }
+  };
 
   return (
     <AppShell>
-      <div className="mb-6 flex flex-wrap items-end gap-3">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3 print:hidden">
         <div>
           <h1 className="text-3xl font-bold">Vyúčtování DPH</h1>
           <p className="text-muted-foreground">Kolik zaplatit na DPH a kolik vám přijde od klientů.</p>
         </div>
-        <div className="ml-auto flex items-end gap-2">
-          <div>
-            <p className="mb-1 text-xs text-muted-foreground">Od</p>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div>
-            <p className="mb-1 text-xs text-muted-foreground">Do</p>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          </div>
+        <div className="flex gap-2">
+          <Button variant="outline" disabled={exportDisabled} onClick={exportPdf}><FileDown />{exporting === "pdf" ? "Ukládám…" : "Export PDF"}</Button>
+          <Button variant="outline" disabled={exportDisabled} onClick={exportXlsx}><FileSpreadsheet />{exporting === "xlsx" ? "Ukládám…" : "Export Excel"}</Button>
         </div>
       </div>
+      <VatPeriodControls period={period} onChange={setPeriod} disabled={exporting !== null} />
 
-      {isLoading ? (
+      {!validPeriod ? <p role="alert" className="text-destructive">Vyplňte platné období; datum Od nesmí být později než Do.</p> : error ? (
+        <div role="alert" className="space-y-3"><p className="text-destructive">Přehled DPH se nepodařilo načíst.</p><Button variant="outline" onClick={() => refetch()}>Zkusit znovu</Button></div>
+      ) : isLoading ? (
         <div className="flex justify-center py-24">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <>
+        <div ref={reportRef} className="vat-report print-area bg-background">
+          <div className="mb-5">
+            <h2 className="text-xl font-semibold">DPH — {periodLabel}</h2>
+            <p className="text-sm text-muted-foreground">{formatDate(from)} – {formatDate(to)}</p>
+          </div>
           <div className="mb-6 grid gap-4 sm:grid-cols-3">
             <Stat label="DPH k zaplacení" value={formatCurrency(vatToPay)} hint="Zůstatek účtů 343 a 341" />
             <Stat label="Přijde od klientů" value={formatCurrency(toReceive)} hint="Nezaplacené faktury (311)" />
@@ -173,22 +226,7 @@ function VatPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  <RetRow r="1" d="Uskutečněná plnění – základní sazba 21 %" accounts={issuedAccounts(21)} b={ret.out.b21} v={ret.out.v21} />
-                  <RetRow r="2" d="Uskutečněná plnění – snížená sazba 12 %" accounts={issuedAccounts(12)} b={ret.out.b12} v={ret.out.v12} />
-                  <RetRow r="26" d="Plnění osvobozená / bez daně (0 %)" accounts="602 D" b={ret.out.b0} />
-                  <RetRow r="40" d="Odpočet – přijatá plnění 21 % (můžete odečíst)" accounts={receivedAccounts(21)} b={ret.inp.b21} v={ret.inp.v21} highlight />
-                  <RetRow r="41" d="Odpočet – přijatá plnění 12 % (můžete odečíst)" accounts={receivedAccounts(12)} b={ret.inp.b12} v={ret.inp.v12} highlight />
-                  <RetRow r="46" d="Odpočet daně celkem" accounts={receivedAccounts()} v={ret.inVat} highlight />
-                  <RetRow r="62" d="Daň na výstupu celkem" accounts={issuedAccounts()} v={ret.outVat} />
-                  <tr className="font-semibold">
-                    <td className="pt-3 pr-3">{ret.result >= 0 ? "64" : "65"}</td>
-                    <td className="pt-3 pr-3">
-                      {ret.result >= 0 ? "Vlastní daňová povinnost (zaplatit)" : "Nadměrný odpočet (vrátí se)"}
-                    </td>
-                    <td />
-                    <td />
-                    <td className="pt-3 text-right">{formatCurrency(Math.abs(ret.result))}</td>
-                  </tr>
+                  {returnLines.map((line) => <RetRow key={line.r} {...line} />)}
                 </tbody>
               </table>
             </CardContent>
@@ -270,7 +308,8 @@ function VatPage() {
               </p>
             </CardContent>
           </Card>
-        </>
+          <p className="mt-4 text-xs text-muted-foreground">Orientační podklad pro DPH. Oficiální podání proveďte přes portál finanční správy.</p>
+        </div>
       )}
     </AppShell>
   );
