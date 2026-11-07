@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
 import { useAccountNames, accountLabel } from "@/lib/accounting";
+import { vatAccountSummary } from "@/lib/accounting-rules";
 import { formatCurrency } from "@/lib/invoice-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,8 +40,8 @@ function VatPage() {
     queryFn: async () => {
       let invQ = supabase
         .from("invoices")
-        .select("id, status, total, invoice_items(quantity, unit_price, vat_rate)");
-      let recQ = supabase.from("received_invoices").select("subtotal, vat_rate, vat_amount");
+        .select("id, status, total, vat_account, invoice_items(quantity, unit_price, vat_rate)");
+      let recQ = supabase.from("received_invoices").select("subtotal, vat_rate, vat_amount, expense_account, vat_account");
       let entQ = supabase.from("accounting_entries").select("account, direction, amount, entry_date");
       if (from) {
         invQ = invQ.gte("taxable_date", from);
@@ -119,6 +120,8 @@ function VatPage() {
     .reduce((s, e) => s + Number(e.amount), 0);
   const totalVat = byRate.reduce((s, [, v]) => s + v.vat, 0);
   const totalBase = byRate.reduce((s, [, v]) => s + v.base, 0);
+  const issuedAccounts = (rate?: number) => vatAccountSummary("issued", (data?.invoices ?? []).filter((invoice) => rate === undefined || invoice.invoice_items.some((item) => Number(item.vat_rate) === rate)));
+  const receivedAccounts = (rate?: number) => vatAccountSummary("received", (data?.received ?? []).filter((invoice) => rate === undefined || Number(invoice.vat_rate) === rate));
 
   return (
     <AppShell>
@@ -164,23 +167,25 @@ function VatPage() {
                   <tr className="border-b">
                     <th className="py-2 pr-3">Řádek</th>
                     <th className="py-2 pr-3">Popis</th>
+                    <th className="py-2 pr-3">Účty základu / DPH</th>
                     <th className="py-2 pr-3 text-right">Základ</th>
                     <th className="py-2 text-right">Daň</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <RetRow r="1" d="Uskutečněná plnění – základní sazba 21 %" b={ret.out.b21} v={ret.out.v21} />
-                  <RetRow r="2" d="Uskutečněná plnění – snížená sazba 12 %" b={ret.out.b12} v={ret.out.v12} />
-                  <RetRow r="26" d="Plnění osvobozená / bez daně (0 %)" b={ret.out.b0} />
-                  <RetRow r="40" d="Odpočet – přijatá plnění 21 % (můžete odečíst)" b={ret.inp.b21} v={ret.inp.v21} highlight />
-                  <RetRow r="41" d="Odpočet – přijatá plnění 12 % (můžete odečíst)" b={ret.inp.b12} v={ret.inp.v12} highlight />
-                  <RetRow r="46" d="Odpočet daně celkem" v={ret.inVat} highlight />
-                  <RetRow r="62" d="Daň na výstupu celkem" v={ret.outVat} />
+                  <RetRow r="1" d="Uskutečněná plnění – základní sazba 21 %" accounts={issuedAccounts(21)} b={ret.out.b21} v={ret.out.v21} />
+                  <RetRow r="2" d="Uskutečněná plnění – snížená sazba 12 %" accounts={issuedAccounts(12)} b={ret.out.b12} v={ret.out.v12} />
+                  <RetRow r="26" d="Plnění osvobozená / bez daně (0 %)" accounts="602 D" b={ret.out.b0} />
+                  <RetRow r="40" d="Odpočet – přijatá plnění 21 % (můžete odečíst)" accounts={receivedAccounts(21)} b={ret.inp.b21} v={ret.inp.v21} highlight />
+                  <RetRow r="41" d="Odpočet – přijatá plnění 12 % (můžete odečíst)" accounts={receivedAccounts(12)} b={ret.inp.b12} v={ret.inp.v12} highlight />
+                  <RetRow r="46" d="Odpočet daně celkem" accounts={receivedAccounts()} v={ret.inVat} highlight />
+                  <RetRow r="62" d="Daň na výstupu celkem" accounts={issuedAccounts()} v={ret.outVat} />
                   <tr className="font-semibold">
                     <td className="pt-3 pr-3">{ret.result >= 0 ? "64" : "65"}</td>
                     <td className="pt-3 pr-3">
                       {ret.result >= 0 ? "Vlastní daňová povinnost (zaplatit)" : "Nadměrný odpočet (vrátí se)"}
                     </td>
+                    <td />
                     <td />
                     <td className="pt-3 text-right">{formatCurrency(Math.abs(ret.result))}</td>
                   </tr>
@@ -271,11 +276,12 @@ function VatPage() {
   );
 }
 
-function RetRow({ r, d, b, v, highlight }: { r: string; d: string; b?: number; v?: number; highlight?: boolean }) {
+function RetRow({ r, d, accounts, b, v, highlight }: { r: string; d: string; accounts?: string; b?: number; v?: number; highlight?: boolean }) {
   return (
     <tr className={`border-b ${highlight ? "bg-accent/50" : ""}`}>
       <td className="py-2 pr-3 font-medium">{r}</td>
       <td className="py-2 pr-3">{d}</td>
+      <td className="py-2 pr-3">{accounts}</td>
       <td className="py-2 pr-3 text-right whitespace-nowrap">{b === undefined ? "" : formatCurrency(b)}</td>
       <td className="py-2 text-right whitespace-nowrap">{v === undefined ? "" : formatCurrency(v)}</td>
     </tr>

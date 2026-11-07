@@ -31,6 +31,8 @@ export const Route = createFileRoute("/nastaveni")({
       },
       { property: "og:title", content: "Nastavení firmy — Accountrix" },
       { property: "og:description", content: "Profil firmy, logo a vzhled PDF faktury." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: SettingsPage,

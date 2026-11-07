@@ -1,16 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { COMPANY_POSTING_ACCOUNTS } from "./accounting-rules";
 
 export const ACCOUNT_NAMES: Record<string, string> = {
   "211": "Pokladna",
   "221": "Bankovní účty",
-  "311": "Odběratelé",
+  [COMPANY_POSTING_ACCOUNTS.receivables]: "Odběratelé",
   "321": "Dodavatelé",
-  "343": "DPH",
+  [COMPANY_POSTING_ACCOUNTS.vat]: "DPH",
   "501": "Spotřeba materiálu",
-  "518": "Ostatní služby",
+  [COMPANY_POSTING_ACCOUNTS.expenses]: "Ostatní služby",
   "601": "Tržby za vlastní výrobky",
-  "602": "Tržby z prodeje služeb",
+  [COMPANY_POSTING_ACCOUNTS.revenue]: "Tržby z prodeje služeb",
   "604": "Tržby za zboží",
 };
 

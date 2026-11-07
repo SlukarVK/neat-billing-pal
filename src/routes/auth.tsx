@@ -22,6 +22,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Přihlaste se do Accountrix a spravujte své faktury." },
       { property: "og:title", content: "Přihlášení — Accountrix" },
       { property: "og:description", content: "Přihlaste se do Accountrix a spravujte své faktury." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,

@@ -82,6 +82,8 @@ export const Route = createFileRoute("/faktury/")({
       { name: "description", content: "Přehled, vyhledávání a správa vašich faktur v Accountrix." },
       { property: "og:title", content: "Faktury — Accountrix" },
       { property: "og:description", content: "Přehled, vyhledávání a správa vašich faktur." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: InvoicesPage,

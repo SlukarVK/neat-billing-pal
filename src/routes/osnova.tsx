@@ -69,9 +69,9 @@ function ChartPage() {
         </CardHeader>
         <CardContent>
           <form className="grid gap-3 sm:grid-cols-[140px_1fr_220px_auto]" onSubmit={(e) => { e.preventDefault(); if (!f.account.trim() || !f.name.trim()) { toast.error("Vyplňte číslo i název účtu."); return; } save.mutate([{ ...f, account: f.account.trim(), name: f.name.trim() }]); }}>
-            <Input placeholder="Číslo, např. 311100" value={f.account} onChange={(e) => setF({ ...f, account: e.target.value, category: f.category === "ostatni" ? guessCat(e.target.value) : f.category })} />
-            <Input placeholder="Název účtu" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-            <select className="h-10 rounded-md border border-input bg-background px-2 text-sm" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
+            <Input aria-label="Číslo účtu" placeholder="Číslo, např. 311100" value={f.account} onChange={(e) => setF({ ...f, account: e.target.value, category: f.category === "ostatni" ? guessCat(e.target.value) : f.category })} />
+            <Input aria-label="Název účtu" placeholder="Název účtu" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+            <select aria-label="Zařazení účtu" className="h-10 rounded-md border border-input bg-background px-2 text-sm" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
               {Object.entries(ACCOUNT_CATEGORIES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
             <Button type="submit" disabled={save.isPending}><Plus className="mr-1.5 h-4 w-4" />Uložit</Button>

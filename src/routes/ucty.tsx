@@ -210,7 +210,7 @@ function AccountsPage() {
                     <tr key={e.id} className="border-b last:border-0">
                       <td className="py-2 pr-3 whitespace-nowrap">{formatDate(e.entry_date)}</td>
                       <td className="py-2 pr-3">{e.description}</td>
-                      <td className="py-2 pr-3">{e.account}</td>
+                      <td className="py-2 pr-3">{accountLabel(e.account)}</td>
                       <td className="py-2 pr-3">{DIRECTION_LABELS[e.direction]}</td>
                       <td className="py-2 pr-3">
                         {e.invoice_id ? (

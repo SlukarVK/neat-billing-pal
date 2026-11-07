@@ -9,6 +9,8 @@ export const Route = createFileRoute("/faktury/nova")({
       { name: "description", content: "Vytvořte novou fakturu v Accountrix." },
       { property: "og:title", content: "Nová faktura — Accountrix" },
       { property: "og:description", content: "Vytvořte novou fakturu v Accountrix." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: NewInvoicePage,

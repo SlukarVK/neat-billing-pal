@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep company posting defaults and report account references in `src/lib/accounting-rules.ts`; reports derive tax figures from stored invoices, not account names or balances, because invoice data retains tax rates and partner details.

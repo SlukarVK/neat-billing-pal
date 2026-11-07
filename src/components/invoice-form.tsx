@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { addDays, calcItemTotals, daysUntilDue, formatCurrency } from "@/lib/invoice-utils";
 import { useCompanyProfile } from "@/lib/company-profile";
+import { COMPANY_POSTING_ACCOUNTS } from "@/lib/accounting-rules";
+import { useAccountNames } from "@/lib/accounting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +56,7 @@ export function InvoiceForm({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: profile } = useCompanyProfile();
+  const accountNames = useAccountNames();
   const [prefilled, setPrefilled] = useState(false);
 
   const [form, setForm] = useState({
@@ -74,7 +77,7 @@ export function InvoiceForm({
     payment_method: invoice?.payment_method ?? "prevod",
     bank_account: invoice?.bank_account ?? "",
     variable_symbol: invoice?.variable_symbol ?? "",
-    vat_account: invoice?.vat_account ?? "343",
+    vat_account: invoice?.vat_account ?? COMPANY_POSTING_ACCOUNTS.vat,
     currency: invoice?.currency ?? "CZK",
     note: invoice?.note ?? "",
   });
@@ -305,11 +308,12 @@ export function InvoiceForm({
           <div className="space-y-1.5">
             <Label>Účet DPH</Label>
             <select
+              aria-label="Účet DPH"
               className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
               value={form.vat_account}
               onChange={(e) => set("vat_account", e.target.value)}
             >
-              <option value="343">343 – DPH</option>
+              <option value="343">343 – {accountNames["343"]}</option>
               <option value="341">341 – Daň z příjmů</option>
             </select>
           </div>

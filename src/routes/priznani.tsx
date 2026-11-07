@@ -6,6 +6,7 @@ import { FileDown, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
 import { useCompanyProfile } from "@/lib/company-profile";
+import { vatAccountSummary, vatPostingAccounts } from "@/lib/accounting-rules";
 import { formatCurrency, formatDate } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,15 +42,16 @@ function ReturnPage() {
   const docRef = useRef<HTMLDivElement>(null);
   const [attach, setAttach] = useState(true);
   const [pdfBusy, setPdfBusy] = useState(false);
-  type Iss = { invoice_number: string; client_name: string; taxable_date: string; subtotal: number; vat_amount: number; total: number };
-  type Rec = { invoice_number: string; supplier_name: string; taxable_date: string; subtotal: number; vat_amount: number; total: number };
+  type Iss = { invoice_number: string; client_name: string; taxable_date: string; subtotal: number; vat_amount: number; total: number; vat_account: string };
+  type Rec = { invoice_number: string; supplier_name: string; taxable_date: string; subtotal: number; vat_amount: number; total: number; expense_account: string; vat_account: string };
   const [issued, setIssued] = useState<Iss[]>([]);
   const [received, setReceived] = useState<Rec[]>([]);
   const generate = async () => {
     const [a, b] = await Promise.all([
-      supabase.from("invoices").select("invoice_number, client_name, taxable_date, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
-      supabase.from("received_invoices").select("invoice_number, supplier_name, taxable_date, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
+      supabase.from("invoices").select("invoice_number, client_name, taxable_date, subtotal, vat_amount, total, vat_account").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
+      supabase.from("received_invoices").select("invoice_number, supplier_name, taxable_date, subtotal, vat_amount, total, expense_account, vat_account").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
     ]);
+    if (a.error || b.error) { toast.error("Faktury se nepodařilo načíst."); return; }
     setIssued(a.data ?? []);
     setReceived(b.data ?? []);
     setGenerated(true);
@@ -100,6 +102,16 @@ function ReturnPage() {
   const out = num(v.v1) + num(v.v2);
   const inp = num(v.v40) + num(v.v41);
   const res = out - inp;
+  const lineAccounts = (row: string) => {
+    if (["1", "2", "62"].includes(row)) return vatAccountSummary("issued", issued);
+    if (row === "26") return "602 D";
+    if (["40", "41", "46"].includes(row)) return vatAccountSummary("received", received);
+    return "";
+  };
+  const posting = (kind: "issued" | "received", invoice: Iss | Rec) => {
+    const a = vatPostingAccounts(kind, invoice);
+    return `${a.counterparty} ${a.counterpartyDirection} · ${a.base} ${a.direction} / ${a.vat} ${a.direction}`;
+  };
 
   const lines: { r: string; d: string; b?: keyof Vals; t?: keyof Vals }[] = [
     { r: "1", d: "Dodání zboží / poskytnutí služeb – základní sazba 21 %", b: "b1", t: "v1" },
@@ -152,10 +164,10 @@ function ReturnPage() {
                   <td className="py-2 pr-3 font-medium">{l.r}</td>
                   <td className="py-2 pr-3">{l.d}</td>
                   <td className="py-2 pr-3">
-                    {l.b && <Input inputMode="decimal" value={v[l.b]} onChange={(e) => setV({ ...v, [l.b!]: e.target.value })} />}
+                    {l.b && <Input inputMode="decimal" value={v[l.b]} onChange={(e) => { const key = l.b; if (key) setV({ ...v, [key]: e.target.value }); }} />}
                   </td>
                   <td className="py-2">
-                    {l.t && <Input inputMode="decimal" value={v[l.t]} onChange={(e) => setV({ ...v, [l.t!]: e.target.value })} />}
+                    {l.t && <Input inputMode="decimal" value={v[l.t]} onChange={(e) => { const key = l.t; if (key) setV({ ...v, [key]: e.target.value }); }} />}
                   </td>
                 </tr>
               ))}
@@ -201,6 +213,7 @@ function ReturnPage() {
                 <tr>
                   <th className="border px-2 py-1">Ř.</th>
                   <th className="border px-2 py-1">Popis</th>
+                  <th className="border px-2 py-1">Účty základu / DPH</th>
                   <th className="border px-2 py-1 text-right">Základ daně</th>
                   <th className="border px-2 py-1 text-right">Daň</th>
                 </tr>
@@ -210,6 +223,7 @@ function ReturnPage() {
                   <tr key={l.r}>
                     <td className="border px-2 py-1">{l.r}</td>
                     <td className="border px-2 py-1">{l.d}</td>
+                    <td className="border px-2 py-1">{lineAccounts(l.r)}</td>
                     <td className="border px-2 py-1 text-right">{l.b ? formatCurrency(num(v[l.b])) : ""}</td>
                     <td className="border px-2 py-1 text-right">{l.t ? formatCurrency(num(v[l.t])) : ""}</td>
                   </tr>
@@ -217,18 +231,21 @@ function ReturnPage() {
                 <tr>
                   <td className="border px-2 py-1">46</td>
                   <td className="border px-2 py-1">Odpočet daně celkem</td>
+                  <td className="border px-2 py-1">{lineAccounts("46")}</td>
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1 text-right">{formatCurrency(inp)}</td>
                 </tr>
                 <tr>
                   <td className="border px-2 py-1">62</td>
                   <td className="border px-2 py-1">Daň na výstupu celkem</td>
+                  <td className="border px-2 py-1">{lineAccounts("62")}</td>
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1 text-right">{formatCurrency(out)}</td>
                 </tr>
                 <tr className="font-semibold">
                   <td className="border px-2 py-1">{res >= 0 ? "64" : "65"}</td>
                   <td className="border px-2 py-1">{res >= 0 ? "Vlastní daňová povinnost" : "Nadměrný odpočet"}</td>
+                  <td className="border px-2 py-1" />
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1 text-right">{formatCurrency(Math.abs(res))}</td>
                 </tr>
@@ -239,8 +256,8 @@ function ReturnPage() {
             </p>
             {attach && (
               <>
-                <AttachTable title="Příloha 1 – Vydané faktury" partner="Odběratel" rows={issued.map((i) => ({ ...i, partner: i.client_name }))} />
-                <AttachTable title="Příloha 2 – Přijaté faktury" partner="Dodavatel" rows={received.map((i) => ({ ...i, partner: i.supplier_name }))} />
+                <AttachTable title="Příloha 1 – Vydané faktury" partner="Odběratel" rows={issued.map((i) => ({ ...i, partner: i.client_name, accounts: posting("issued", i) }))} />
+                <AttachTable title="Příloha 2 – Přijaté faktury" partner="Dodavatel" rows={received.map((i) => ({ ...i, partner: i.supplier_name, accounts: posting("received", i) }))} />
               </>
             )}
           </div>
@@ -251,7 +268,7 @@ function ReturnPage() {
   );
 }
 
-function AttachTable({ title, partner, rows }: { title: string; partner: string; rows: { invoice_number: string; partner: string; taxable_date: string; subtotal: number; vat_amount: number; total: number }[] }) {
+function AttachTable({ title, partner, rows }: { title: string; partner: string; rows: { invoice_number: string; partner: string; accounts: string; taxable_date: string; subtotal: number; vat_amount: number; total: number }[] }) {
   const sum = (k: "subtotal" | "vat_amount" | "total") => rows.reduce((s, r) => s + Number(r[k]), 0);
   return (
     <div className="pt-4">
@@ -262,6 +279,7 @@ function AttachTable({ title, partner, rows }: { title: string; partner: string;
             <th className="border px-2 py-1">Číslo</th>
             <th className="border px-2 py-1">{partner}</th>
             <th className="border px-2 py-1">DUZP</th>
+            <th className="border px-2 py-1">Účty</th>
             <th className="border px-2 py-1 text-right">Základ</th>
             <th className="border px-2 py-1 text-right">DPH</th>
             <th className="border px-2 py-1 text-right">Celkem</th>
@@ -273,17 +291,18 @@ function AttachTable({ title, partner, rows }: { title: string; partner: string;
               <td className="border px-2 py-1">{r.invoice_number}</td>
               <td className="border px-2 py-1">{r.partner}</td>
               <td className="border px-2 py-1 whitespace-nowrap">{formatDate(r.taxable_date)}</td>
+              <td className="border px-2 py-1">{r.accounts}</td>
               <td className="border px-2 py-1 text-right whitespace-nowrap">{formatCurrency(Number(r.subtotal))}</td>
               <td className="border px-2 py-1 text-right whitespace-nowrap">{formatCurrency(Number(r.vat_amount))}</td>
               <td className="border px-2 py-1 text-right whitespace-nowrap">{formatCurrency(Number(r.total))}</td>
             </tr>
           ))}
           {!rows.length && (
-            <tr><td colSpan={6} className="border px-2 py-2 text-center text-muted-foreground">Žádné faktury v období.</td></tr>
+            <tr><td colSpan={7} className="border px-2 py-2 text-center text-muted-foreground">Žádné faktury v období.</td></tr>
           )}
           {rows.length > 0 && (
             <tr className="font-semibold">
-              <td className="border px-2 py-1" colSpan={3}>Celkem</td>
+              <td className="border px-2 py-1" colSpan={4}>Celkem</td>
               <td className="border px-2 py-1 text-right">{formatCurrency(sum("subtotal"))}</td>
               <td className="border px-2 py-1 text-right">{formatCurrency(sum("vat_amount"))}</td>
               <td className="border px-2 py-1 text-right">{formatCurrency(sum("total"))}</td>

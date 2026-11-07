@@ -11,6 +11,8 @@ export const Route = createFileRoute("/faktury/$id/upravit")({
       { name: "description", content: "Upravte údaje, položky a DPH na faktuře." },
       { property: "og:title", content: "Úprava faktury — Accountrix" },
       { property: "og:description", content: "Upravte údaje, položky a DPH na faktuře." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: EditInvoicePage,

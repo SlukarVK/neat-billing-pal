@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { useAccountNames } from "@/lib/accounting";
+import { COMPANY_POSTING_ACCOUNTS } from "@/lib/accounting-rules";
 import { formatCurrency, formatDate } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,13 +41,12 @@ const empty = {
   due_date: "",
   subtotal: "",
   vat_rate: "21",
-  expense_account: "518",
-  vat_account: "343",
+  expense_account: COMPANY_POSTING_ACCOUNTS.expenses as string,
+  vat_account: COMPANY_POSTING_ACCOUNTS.vat as string,
 };
 
 function ReceivedPage() {
   const accountNames = useAccountNames();
-  void accountNames;
   const { user } = useAuth();
   const qc = useQueryClient();
   const [f, setF] = useState(empty);
@@ -89,7 +89,7 @@ function ReceivedPage() {
         vat_rate: num(f.vat_rate),
         vat_amount: vat,
         total: base + vat,
-        expense_account: f.expense_account.trim() || "518",
+        expense_account: f.expense_account.trim() || COMPANY_POSTING_ACCOUNTS.expenses,
         vat_account: f.vat_account,
       });
       if (error) throw error;
@@ -155,6 +155,7 @@ function ReceivedPage() {
             <div className="space-y-1.5">
               <Label>Nákladový účet</Label>
               <Input
+                aria-label="Nákladový účet"
                 list="exp-accounts"
                 value={f.expense_account}
                 onChange={(e) => setF({ ...f, expense_account: e.target.value })}
@@ -174,11 +175,12 @@ function ReceivedPage() {
             <div className="space-y-1.5">
               <Label>Účet DPH</Label>
               <select
+                aria-label="Účet DPH"
                 className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
                 value={f.vat_account}
                 onChange={(e) => setF({ ...f, vat_account: e.target.value })}
               >
-                <option value="343">343 – DPH</option>
+                <option value="343">343 – {accountNames["343"]}</option>
                 <option value="341">341 – Daň z příjmů</option>
               </select>
             </div>

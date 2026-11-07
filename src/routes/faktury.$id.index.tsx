@@ -56,6 +56,8 @@ export const Route = createFileRoute("/faktury/$id/")({
         property: "og:description",
         content: "Detail faktury se všemi údaji klienta, položkami a DPH.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: InvoiceDetailPage,

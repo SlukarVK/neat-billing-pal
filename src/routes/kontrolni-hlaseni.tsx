@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
 import { useCompanyProfile } from "@/lib/company-profile";
+import { vatAccountSummary } from "@/lib/accounting-rules";
 import { downloadElementAsPdf } from "@/lib/invoice-pdf";
 import { formatCurrency, formatDate } from "@/lib/invoice-utils";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/kontrolni-hlaseni")({
 });
 
 const LIMIT = 10000;
-type Row = { number: string; partner: string; dic: string | null; date: string; rate: number; base: number; vat: number; total: number };
+type Row = { number: string; partner: string; dic: string | null; date: string; rate: number; base: number; vat: number; total: number; vat_account: string; expense_account?: string };
 
 function KhPage() {
   const now = new Date();
@@ -41,13 +42,13 @@ function KhPage() {
   const generate = async () => {
     setBusy(true);
     const [inv, rec] = await Promise.all([
-      supabase.from("invoices").select("invoice_number, client_name, client_dic, taxable_date, vat_rate, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
-      supabase.from("received_invoices").select("invoice_number, supplier_name, supplier_dic, taxable_date, vat_rate, subtotal, vat_amount, total").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
+      supabase.from("invoices").select("invoice_number, client_name, client_dic, taxable_date, vat_rate, subtotal, vat_amount, total, vat_account").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
+      supabase.from("received_invoices").select("invoice_number, supplier_name, supplier_dic, taxable_date, vat_rate, subtotal, vat_amount, total, expense_account, vat_account").gte("taxable_date", from).lte("taxable_date", to).order("taxable_date"),
     ]);
     setBusy(false);
     if (inv.error || rec.error) { toast.error("Faktury se nepodařilo načíst."); return; }
-    const iss: Row[] = (inv.data ?? []).filter((i) => Number(i.vat_amount) !== 0).map((i) => ({ number: i.invoice_number, partner: i.client_name, dic: i.client_dic, date: i.taxable_date, rate: Number(i.vat_rate), base: Number(i.subtotal), vat: Number(i.vat_amount), total: Number(i.total) }));
-    const rc: Row[] = (rec.data ?? []).filter((i) => Number(i.vat_amount) !== 0).map((i) => ({ number: i.invoice_number, partner: i.supplier_name, dic: i.supplier_dic, date: i.taxable_date, rate: Number(i.vat_rate), base: Number(i.subtotal), vat: Number(i.vat_amount), total: Number(i.total) }));
+    const iss: Row[] = (inv.data ?? []).filter((i) => Number(i.vat_amount) !== 0).map((i) => ({ number: i.invoice_number, partner: i.client_name, dic: i.client_dic, date: i.taxable_date, rate: Number(i.vat_rate), base: Number(i.subtotal), vat: Number(i.vat_amount), total: Number(i.total), vat_account: i.vat_account }));
+    const rc: Row[] = (rec.data ?? []).filter((i) => Number(i.vat_amount) !== 0).map((i) => ({ number: i.invoice_number, partner: i.supplier_name, dic: i.supplier_dic, date: i.taxable_date, rate: Number(i.vat_rate), base: Number(i.subtotal), vat: Number(i.vat_amount), total: Number(i.total), expense_account: i.expense_account, vat_account: i.vat_account }));
     const big = (r: Row) => r.total > LIMIT && !!r.dic;
     setData({ a4: iss.filter(big), a5: iss.filter((r) => !big(r)), b2: rc.filter(big), b3: rc.filter((r) => !big(r)) });
   };
@@ -108,6 +109,7 @@ function Section({ title, rows, partner, detail }: { title: string; rows: Row[];
   return (
     <div>
       <h3 className="mb-2 font-semibold">{title}</h3>
+      <p className="mb-2 text-xs text-muted-foreground">Účty základu / DPH: {vatAccountSummary(partner === "Odběratel" ? "issued" : "received", rows)}</p>
       {detail ? (
         <table className="w-full border text-sm">
           <thead className="bg-muted text-left"><tr><th className={th}>Číslo</th><th className={th}>{partner}</th><th className={th}>DIČ</th><th className={th}>DUZP</th><th className={th}>Sazba</th><th className={`${th} text-right`}>Základ</th><th className={`${th} text-right`}>DPH</th></tr></thead>
